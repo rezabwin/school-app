@@ -1,0 +1,3485 @@
+﻿<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سامانه مدرسه</title>
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Vazirmatn', Tahoma, sans-serif; }
+html, body { overflow-x: hidden; width: 100%; }
+:root{
+  --primary:#1e40af; --primary-light:#3b82f6; --primary-dark:#1e3a8a;
+  --success:#16a34a; --warning:#f59e0b; --danger:#dc2626;
+  --bg:#f1f5f9; --card:#ffffff; --text:#1e293b; --muted:#64748b;
+  --border:#e2e8f0; --shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+body{ background:var(--bg); color:var(--text); min-height:100vh; }
+.hidden{ display:none !important; }
+
+#authScreen{
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,#1e40af,#3b82f6); padding:20px;
+}
+.auth-card{
+  background:#fff; border-radius:20px; padding:32px 28px; width:100%; max-width:420px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.2);
+}
+.auth-logo{
+  text-align:center; margin-bottom:12px;
+}
+.auth-logo-img{
+  width: 90px; height: 90px; border-radius: 50%;
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 50px; margin: 0 auto;
+  box-shadow: 0 8px 20px rgba(30,64,175,0.3);
+}
+.auth-title{ text-align:center; font-size:22px; font-weight:700; color:var(--primary-dark); margin-bottom:6px;}
+.auth-sub{ text-align:center; color:var(--muted); font-size:13px; margin-bottom:24px;}
+.tabs{ display:flex; background:var(--bg); border-radius:12px; padding:4px; margin-bottom:20px;}
+.tabs button{
+  flex:1; padding:10px; border:none; background:transparent; border-radius:9px;
+  cursor:pointer; font-size:14px; font-weight:600; color:var(--muted); transition:.2s; font-family:inherit;
+}
+.tabs button.active{ background:#fff; color:var(--primary); box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+.field{ margin-bottom:14px;}
+.field label{ display:block; font-size:13px; font-weight:600; margin-bottom:6px; color:var(--text);}
+.field input, .field select, .field textarea{
+  width:100%; padding:11px 14px; border:1.5px solid var(--border); border-radius:10px;
+  font-size:14px; font-family:inherit; transition:.2s; background:#fff;
+}
+.field input:focus, .field select:focus, .field textarea:focus{ outline:none; border-color:var(--primary-light); box-shadow:0 0 0 3px rgba(59,130,246,0.15);}
+.btn{
+  width:100%; padding:12px; border:none; border-radius:10px; font-size:15px;
+  font-weight:700; cursor:pointer; font-family:inherit; transition:.2s;
+}
+.btn-primary{ background:var(--primary); color:#fff;}
+.btn-primary:hover{ background:var(--primary-dark);}
+.btn-outline{ background:#fff; border:1.5px solid var(--border); color:var(--text);}
+.btn-outline:hover{ background:var(--bg);}
+.btn-sm{ padding:7px 14px; font-size:13px; width:auto; border-radius:8px;}
+.auth-footer{ text-align:center; font-size:13px; color:var(--muted); margin-top:16px;}
+.auth-footer a{ color:var(--primary); cursor:pointer; font-weight:600; text-decoration:none;}
+.alert{ padding:10px 14px; border-radius:10px; font-size:13px; margin-bottom:14px; display:none;}
+.alert.show{ display:block;}
+.alert-error{ background:#fee2e2; color:#991b1b;}
+.alert-success{ background:#dcfce7; color:#166534;}
+
+#app{ display:none; min-height:100vh;}
+#app.active{ display:flex; flex-direction:column;}
+.topbar{
+  background:var(--primary); color:#fff; padding:14px 20px;
+  display:flex; align-items:center; justify-content:space-between;
+  box-shadow:0 2px 10px rgba(0,0,0,0.1); position:sticky; top:0; z-index:100;
+}
+.topbar-title{ font-size:17px; font-weight:700; display:flex; align-items:center; gap:8px;}
+.topbar-logo{
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.topbar-user{ display:flex; align-items:center; gap:12px; font-size:13px;}
+.avatar{
+  width:38px; height:38px; border-radius:50%; background:rgba(255,255,255,0.25);
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px;
+}
+.logout-btn{
+  background:rgba(255,255,255,0.2); border:none; color:#fff; padding:7px 12px;
+  border-radius:8px; cursor:pointer; font-size:12px; font-family:inherit; font-weight:600;
+}
+.logout-btn:hover{ background:rgba(255,255,255,0.3);}
+
+.layout{ display:flex; flex:1; min-width:0; }
+.sidebar{
+  width:230px; background:#fff; border-left:1px solid var(--border);
+  padding:16px 10px; position:sticky; top:66px;
+  height:calc(100vh - 66px); overflow-y:auto; flex-shrink:0;
+}
+.nav-item{
+  display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:10px;
+  cursor:pointer; font-size:14px; font-weight:600; color:var(--muted);
+  margin-bottom:4px; transition:.2s; border:none; background:transparent; width:100%; text-align:right; font-family:inherit;
+}
+.nav-item:hover{ background:var(--bg); color:var(--text);}
+.nav-item.active{ background:var(--primary); color:#fff;}
+.nav-item .ico{ font-size:17px; width:22px; text-align:center;}
+
+.main{ flex:1; padding:24px; min-width:0; overflow-x: hidden; }
+.page-title{ font-size:22px; font-weight:800; margin-bottom:6px; color:var(--primary-dark);}
+.page-sub{ color:var(--muted); font-size:13px; margin-bottom:22px;}
+.page-header-flex{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:20px;}
+.page-header-flex h2{ margin:0;}
+
+.grid{ display:grid; gap:16px;}
+.grid-2{ grid-template-columns:repeat(auto-fit,minmax(280px,1fr));}
+.grid-3{ grid-template-columns:repeat(auto-fit,minmax(220px,1fr));}
+.grid-4{ grid-template-columns:repeat(auto-fit,minmax(180px,1fr));}
+.card{
+  background:var(--card); border-radius:14px; padding:18px; box-shadow:var(--shadow);
+  border:1px solid var(--border);
+}
+.stat{ display:flex; align-items:center; gap:14px;}
+.stat-ico{
+  width:48px; height:48px; border-radius:12px; display:flex; align-items:center;
+  justify-content:center; font-size:22px; flex-shrink:0;
+}
+.stat-val{ font-size:22px; font-weight:800; color:var(--primary-dark);}
+.stat-lbl{ font-size:12px; color:var(--muted); margin-top:2px;}
+.bg-blue{ background:#dbeafe; color:#1e40af;}
+.bg-green{ background:#dcfce7; color:#166534;}
+.bg-orange{ background:#ffedd5; color:#9a3412;}
+.bg-purple{ background:#ede9fe; color:#6d28d9;}
+.bg-pink{ background:#fce7f3; color:#9d174d;}
+.bg-red{ background:#fee2e2; color:#991b1b;}
+
+/* جدول با اسکرول داخلی — نه کل صفحه */
+.table-wrap{
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#fff;
+  -webkit-overflow-scrolling: touch;
+}
+.table-wrap table{ width:100%; border-collapse:collapse; font-size:13.5px; }
+thead{ background:var(--bg);}
+th{ padding:12px 14px; text-align:right; font-weight:700; color:var(--primary-dark); font-size:13px; white-space:nowrap;}
+td{ padding:11px 14px; border-top:1px solid var(--border); text-align:right; white-space:nowrap;}
+tbody tr:hover{ background:#f8fafc;}
+.badge{ display:inline-block; padding:3px 10px; border-radius:20px; font-size:11.5px; font-weight:700;}
+.badge-green{ background:#dcfce7; color:#166534;}
+.badge-red{ background:#fee2e2; color:#991b1b;}
+.badge-orange{ background:#ffedd5; color:#9a3412;}
+.badge-blue{ background:#dbeafe; color:#1e40af;}
+.badge-gray{ background:#f1f5f9; color:#475569;}
+
+.form-row{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px;}
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(15,23,42,0.6); z-index:1000;
+  display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(3px);
+}
+.modal{
+  background:#fff; border-radius:18px; padding:26px; width:100%; max-width:560px;
+  max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3);
+}
+.modal h3{ font-size:18px; font-weight:800; color:var(--primary-dark); margin-bottom:18px;}
+.modal-actions{ display:flex; gap:10px; margin-top:20px;}
+.modal-actions .btn{ flex:1;}
+
+.notice{
+  background:#fff; border-radius:12px; padding:16px; box-shadow:var(--shadow);
+  border-right:4px solid var(--primary); margin-bottom:12px;
+}
+.notice-title{ font-weight:700; font-size:15px; margin-bottom:6px; color:var(--primary-dark);}
+.notice-body{ font-size:13.5px; color:var(--text); line-height:1.7; margin-bottom:8px;}
+.notice-meta{ font-size:11.5px; color:var(--muted); display:flex; gap:14px; flex-wrap:wrap;}
+.notice.pinned{ border-right-color:var(--warning); background:#fffbeb;}
+
+.msg-list{ display:flex; flex-direction:column; gap:10px; max-height:400px; overflow-y:auto; padding:4px;}
+.msg{ padding:11px 14px; border-radius:12px; font-size:13.5px; max-width:80%; line-height:1.6;}
+.msg-me{ background:var(--primary); color:#fff; align-self:flex-start; border-bottom-right-radius:4px;}
+.msg-other{ background:#f1f5f9; color:var(--text); align-self:flex-end; border-bottom-left-radius:4px;}
+.msg-meta{ font-size:10.5px; opacity:0.8; margin-top:4px;}
+
+.empty{ text-align:center; padding:40px 20px; color:var(--muted);}
+.empty .ico{ font-size:44px; margin-bottom:10px; opacity:0.5;}
+
+.progress{ height:8px; background:var(--bg); border-radius:10px; overflow:hidden; margin-top:8px;}
+.progress-bar{ height:100%; background:var(--success); border-radius:10px; transition:.3s;}
+
+.mobile-menu-btn{
+  display:none; background:rgba(255,255,255,0.2); border:none; color:#fff;
+  font-size:20px; padding:6px 12px; border-radius:8px; cursor:pointer;
+}
+
+.student-search-wrap{ position:relative; }
+.student-search-list{
+  display:none; position:absolute; top:100%; right:0; left:0; background:#fff;
+  border:1.5px solid var(--border); border-top:none; border-radius:0 0 10px 10px;
+  max-height:240px; overflow-y:auto; z-index:100; box-shadow:0 8px 20px rgba(0,0,0,0.1);
+}
+.student-search-list.show{ display:block; }
+.student-search-item{
+  padding:10px 14px; cursor:pointer; border-bottom:1px solid var(--border); font-size:13.5px;
+}
+.student-search-item:hover{ background:var(--bg); }
+.student-search-item strong{ color:var(--primary-dark); }
+.student-search-item .meta{ color:var(--muted); font-size:12px; }
+.student-search-item .national{ color:var(--muted); font-size:11px; float:left; }
+
+/* ============ لوگوی مدرسه در وسط صفحه ورود ============ */
+.logo-circle {
+  width: 100px; height: 100px;
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 55px;
+  margin: 0 auto 16px auto;
+  box-shadow: 0 10px 25px rgba(30,64,175,0.3);
+}
+
+@media(max-width:768px){
+  .sidebar{
+    position:fixed; right:-260px; top:66px; z-index:200; transition:.3s;
+    box-shadow:-5px 0 20px rgba(0,0,0,0.15); height:calc(100vh - 66px);
+  }
+  .sidebar.open{ right:0;}
+  .mobile-menu-btn{ display:block;}
+  .main{ padding:16px;}
+  .page-title{ font-size:18px;}
+  .stat-val{ font-size:18px;}
+  .topbar-user span{ display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ صفحه ورود ============ -->
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="logo-circle">🏫</div>
+    <h1 class="auth-title">سامانه مدرسه</h1>
+    <p class="auth-sub">مدیریت آموزشی هوشمند</p>
+
+    <div class="tabs">
+      <button class="active" onclick="switchAuthTab('login')">ورود</button>
+      <button onclick="switchAuthTab('register')">ثبت‌نام دانش‌آموز</button>
+    </div>
+
+    <div class="alert alert-error" id="authError"></div>
+    <div class="alert alert-success" id="authSuccess"></div>
+
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <div class="field">
+        <label>نقش کاربری</label>
+        <select id="loginRole" required>
+          <option value="student">دانش‌آموز</option>
+          <option value="parent">والد</option>
+          <option value="teacher">معلم</option>
+          <option value="admin">مدیر</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>کد ملی / نام کاربری</label>
+        <input type="text" id="loginUser" placeholder="مثلاً 0012345678" required>
+      </div>
+      <div class="field">
+        <label>رمز عبور</label>
+        <input type="password" id="loginPass" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn btn-primary">ورود به سامانه</button>
+      <p class="auth-footer">
+        حساب ندارید؟ <a onclick="switchAuthTab('register')">ثبت‌نام کنید</a>
+      </p>
+    </form>
+
+    <form id="registerForm" class="hidden" onsubmit="handleRegister(event)">
+      <div class="field">
+        <label>نام و نام خانوادگی</label>
+        <input type="text" id="regName" placeholder="مثلاً علی محمدی" required>
+      </div>
+      <div class="field">
+        <label>کد ملی</label>
+        <input type="text" id="regNational" placeholder="۱۰ رقمی" maxlength="10" required>
+      </div>
+      <div class="field">
+        <label>پایه و کلاس</label>
+        <select id="regClass" required></select>
+      </div>
+      <div class="field">
+        <label>شماره تماس پدر</label>
+        <input type="tel" id="regFather" placeholder="09xxxxxxxxx" required>
+      </div>
+      <div class="field">
+        <label>شماره تماس مادر</label>
+        <input type="tel" id="regMother" placeholder="09xxxxxxxxx" required>
+      </div>
+      <div class="field">
+        <label>شماره شاد دانش‌آموز</label>
+        <input type="tel" id="regShad" placeholder="09xxxxxxxxx" required>
+      </div>
+      <div class="field">
+        <label>رمز عبور</label>
+        <input type="password" id="regPass" placeholder="حداقل ۶ کاراکتر" minlength="6" required>
+      </div>
+      <button type="submit" class="btn btn-primary">ثبت‌نام و دریافت کد رهگیری</button>
+      <p class="auth-footer">
+        حساب دارید؟ <a onclick="switchAuthTab('login')">وارد شوید</a>
+      </p>
+    </form>
+  </div>
+</div>
+
+<!-- ============ اپلیکیشن اصلی ============ -->
+<div id="app">
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="topbar-logo">🏫</div>
+      <div class="topbar-title">سامانه مدرسه</div>
+    </div>
+    <div class="topbar-user">
+      <div class="avatar" id="userAvatar">؟</div>
+      <div>
+        <div style="font-weight:700;" id="userName">کاربر</div>
+        <div style="font-size:11px;opacity:0.8;" id="userRole">نقش</div>
+      </div>
+      <button class="logout-btn" onclick="handleLogout()">خروج</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <nav id="navMenu"></nav>
+    </aside>
+    <main class="main" id="mainContent"></main>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   بخش ۳: داده‌ها، راه‌اندازی، احراز هویت، منو
+   ============================================================ */
+
+const DB = {
+  get(k, def){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : def; }catch(e){ return def; } },
+  set(k, v){ localStorage.setItem(k, JSON.stringify(v)); }
+};
+
+const LESSONS = [
+  'ریاضی','علوم تجربی','فارسی','نگارش','عربی','زبان انگلیسی',
+  'مطالعات اجتماعی','پیام‌های آسمان','قرآن','کار و فناوری',
+  'فرهنگ و هنر','تفکر و سبک زندگی','تربیت بدنی'
+];
+
+const CLASSES = [
+  'هفتم الف','هفتم ب','هفتم ج','هفتم د',
+  'هشتم الف','هشتم ب','هشتم ج','هشتم د',
+  'نهم الف','نهم ب','نهم ج','نهم د',
+  'دهم الف','دهم ب','دهم ج','دهم د',
+  'یازدهم الف','یازدهم ب','دوازدهم الف','دوازدهم ب'
+];
+
+const MONTHS = ['مهر','آبان','آذر','دی','بهمن','اسفند','فروردین','اردیبهشت','خرداد'];
+
+function pad(n){ return n<10 ? '0'+n : n; }
+
+/* ---------- تاریخ شمسی ---------- */
+function faDate(d){
+  d = d || new Date();
+  try {
+    const parts = new Intl.DateTimeFormat('en-US-u-ca-persian', {
+      year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(d);
+    const get = (t) => parts.find(p => p.type === t).value;
+    const y = get('year').replace(/\D/g,'');
+    const m = get('month');
+    const day = get('day');
+    return `${y}/${m}/${day}`;
+  } catch(e) {
+    // فالبک
+    return `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}`;
+  }
+}
+
+function genTracking(){ return Math.floor(10000000 + Math.random()*90000000).toString(); }
+
+/* ---------- راه‌اندازی اولیه (بدون دانش‌آموز) ---------- */
+function seedData(){
+  if(DB.get('initialized')) return;
+
+  DB.set('classes', CLASSES);
+  DB.set('lessons', LESSONS);
+
+  const teachers = [
+    { id:'t1', name:'آقای احمدی', national:'1111111111', pass:'123456', lessons:['ریاضی','علوم تجربی'], classes:['هفتم الف','هفتم ب','هشتم الف','هشتم ب'] },
+    { id:'t2', name:'خانم رضایی', national:'2222222222', pass:'123456', lessons:['فارسی','نگارش'], classes:['هفتم الف','هفتم ب','هفتم ج','هفتم د'] },
+    { id:'t3', name:'آقای کریمی', national:'3333333333', pass:'123456', lessons:['عربی','قرآن'], classes:['هشتم الف','هشتم ب','نهم الف'] },
+    { id:'t4', name:'خانم موسوی', national:'4444444444', pass:'123456', lessons:['زبان انگلیسی'], classes:['هفتم الف','هشتم الف','نهم الف'] },
+    { id:'t5', name:'آقای صادقی', national:'5555555555', pass:'123456', lessons:['مطالعات اجتماعی','تفکر و سبک زندگی'], classes:['هفتم الف','هفتم ب','نهم الف'] }
+  ];
+  DB.set('teachers', teachers);
+
+  DB.set('admins', [
+    { id:'a1', name:'مدیر مدرسه', national:'0000000000', pass:'admin123' }
+  ]);
+
+  // ⚠️ دانش‌آموزان خالی — خود کاربر با Excel وارد می‌کند
+  DB.set('students', []);
+  DB.set('grades', {});
+
+  DB.set('homeworks', []);
+  DB.set('exams', []);
+
+  DB.set('notices', [
+    { id:'n1', title:'شروع سال تحصیلی جدید', body:'سال تحصیلی جدید از ۱ مهر آغاز می‌شود. حضور به موقع الزامی است.', date: faDate(), author:'مدیریت', pinned:true },
+    { id:'n2', title:'جلسه اولیا و مربیان', body:'جلسه اولیا و مربیان روز پنجشنبه ساعت ۱۶ در سالن اجتماعات برگزار می‌شود.', date: faDate(), author:'مدیریت', pinned:false }
+  ]);
+
+  DB.set('competitions', []);
+  DB.set('disciplineTypes', ['غیبت','تاخیر','اخراج از کلاس','بی‌نظمی','عدم انجام تکلیف','بی‌احترامی']);
+  DB.set('discipline', []);
+  DB.set('messages', []);
+  DB.set('parents', []);
+  DB.set('initialized', true);
+}
+
+/* ---------- احراز هویت ---------- */
+let currentUser = null;
+
+function switchAuthTab(tab){
+  const loginF = document.getElementById('loginForm');
+  const regF = document.getElementById('registerForm');
+  const tabs = document.querySelectorAll('.tabs button');
+  hideAlerts();
+  if(tab==='login'){
+    loginF.classList.remove('hidden'); regF.classList.add('hidden');
+    tabs[0].classList.add('active'); tabs[1].classList.remove('active');
+  } else {
+    loginF.classList.add('hidden'); regF.classList.remove('hidden');
+    tabs[0].classList.remove('active'); tabs[1].classList.add('active');
+    fillClassSelect();
+  }
+}
+
+function fillClassSelect(){
+  const sel = document.getElementById('regClass');
+  sel.innerHTML = '<option value="">انتخاب کنید...</option>' +
+    DB.get('classes',[]).map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+function showAlert(id, msg){
+  const el = document.getElementById(id);
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 5000);
+}
+function hideAlerts(){
+  document.getElementById('authError').classList.remove('show');
+  document.getElementById('authSuccess').classList.remove('show');
+}
+
+function handleRegister(e){
+  e.preventDefault();
+  hideAlerts();
+  const name = document.getElementById('regName').value.trim();
+  const national = document.getElementById('regNational').value.trim();
+  const cls = document.getElementById('regClass').value;
+  const father = document.getElementById('regFather').value.trim();
+  const mother = document.getElementById('regMother').value.trim();
+  const shad = document.getElementById('regShad').value.trim();
+  const pass = document.getElementById('regPass').value;
+
+  if(!/^\d{10}$/.test(national)) return showAlert('authError','کد ملی باید ۱۰ رقم باشد.');
+  if(!/^09\d{9}$/.test(father)) return showAlert('authError','شماره پدر نامعتبر است.');
+  if(!/^09\d{9}$/.test(mother)) return showAlert('authError','شماره مادر نامعتبر است.');
+  if(!/^09\d{9}$/.test(shad)) return showAlert('authError','شماره شاد نامعتبر است.');
+
+  const students = DB.get('students',[]);
+  if(students.find(s => s.national === national)) return showAlert('authError','این کد ملی قبلاً ثبت شده است.');
+
+  const tracking = genTracking();
+  const student = {
+    id:'s'+Date.now(), name, national, class: cls,
+    father, mother, shad, pass, tracking,
+    createdAt: faDate()
+  };
+  students.push(student);
+  DB.set('students', students);
+
+  // ساخت ساختار نمرات خالی
+  const grades = DB.get('grades',{});
+  grades[student.id] = {};
+  LESSONS.forEach(l => {
+    grades[student.id][l] = {};
+    MONTHS.forEach(m => { grades[student.id][l][m] = {}; });
+  });
+  DB.set('grades', grades);
+
+  showAlert('authSuccess', `✅ ثبت‌نام موفق! کد رهگیری شما: ${tracking} — این کد را نزد خود نگه دارید.`);
+  document.getElementById('registerForm').reset();
+  setTimeout(()=>switchAuthTab('login'), 3000);
+}
+
+function handleLogin(e){
+  e.preventDefault();
+  hideAlerts();
+  const role = document.getElementById('loginRole').value;
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value;
+
+  let found = null;
+  if(role==='student') found = DB.get('students',[]).find(s => s.national===user && s.pass===pass);
+  else if(role==='parent') found = DB.get('parents',[]).find(p => p.national===user && p.pass===pass);
+  else if(role==='teacher') found = DB.get('teachers',[]).find(t => t.national===user && t.pass===pass);
+  else if(role==='admin') found = DB.get('admins',[]).find(a => a.national===user && a.pass===pass);
+
+  if(!found) return showAlert('authError','اطلاعات ورود نامعتبر است.');
+
+  currentUser = { ...found, role };
+  DB.set('currentUser', currentUser);
+  enterApp();
+}
+
+function handleLogout(){
+  currentUser = null;
+  localStorage.removeItem('currentUser');
+  document.getElementById('app').classList.remove('active');
+  document.getElementById('authScreen').style.display = 'flex';
+  document.getElementById('loginForm').reset();
+}
+
+function enterApp(){
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('app').classList.add('active');
+  const roleNames = { student:'دانش‌آموز', parent:'والد', teacher:'معلم', admin:'مدیر' };
+  document.getElementById('userName').textContent = currentUser.name;
+  document.getElementById('userRole').textContent = roleNames[currentUser.role];
+  document.getElementById('userAvatar').textContent = currentUser.name.charAt(0);
+  buildMenu();
+  goTo('dashboard');
+}
+
+function buildMenu(){
+  const menus = {
+    student: [
+      { id:'dashboard', ico:'🏠', label:'داشبورد' },
+      { id:'grades', ico:'📊', label:'نمرات' },
+      { id:'homeworks', ico:'📝', label:'تکالیف' },
+      { id:'exams', ico:'📅', label:'امتحانات' },
+      { id:'discipline', ico:'⚠️', label:'وضعیت انضباطی' },
+      { id:'notices', ico:'📢', label:'اطلاعیه‌ها' },
+      { id:'competitions', ico:'🏆', label:'مسابقات' },
+      { id:'messages', ico:'💬', label:'پیام‌رسانی' },
+      { id:'security', ico:'⚙️', label:'تنظیمات امنیتی' }
+    ],
+    parent: [
+      { id:'dashboard', ico:'🏠', label:'داشبورد' },
+      { id:'grades', ico:'📊', label:'نمرات فرزند' },
+      { id:'homeworks', ico:'📝', label:'تکالیف' },
+      { id:'exams', ico:'📅', label:'امتحانات' },
+      { id:'discipline', ico:'⚠️', label:'وضعیت انضباطی' },
+      { id:'notices', ico:'📢', label:'اطلاعیه‌ها' },
+      { id:'messages', ico:'💬', label:'پیام‌رسانی' },
+      { id:'security', ico:'⚙️', label:'تنظیمات امنیتی' }
+    ],
+    teacher: [
+      { id:'dashboard', ico:'🏠', label:'داشبورد' },
+      { id:'grades', ico:'📊', label:'ثبت نمرات' },
+      { id:'homeworks', ico:'📝', label:'تکالیف' },
+      { id:'exams', ico:'📅', label:'امتحانات' },
+      { id:'discipline', ico:'⚠️', label:'وضعیت انضباطی' },
+      { id:'notices', ico:'📢', label:'اطلاعیه‌ها' },
+      { id:'messages', ico:'💬', label:'پیام‌رسانی' }
+    ],
+    admin: [
+      { id:'dashboard', ico:'🏠', label:'داشبورد' },
+      { id:'students', ico:'👨‍🎓', label:'دانش‌آموزان' },
+      { id:'classes', ico:'🏫', label:'کلاس‌ها' },
+      { id:'reportcards', ico:'📋', label:'کارنامه دانش‌آموزان' },
+      { id:'grades', ico:'📊', label:'نمرات' },
+      { id:'homeworks', ico:'📝', label:'تکالیف' },
+      { id:'exams', ico:'📅', label:'امتحانات' },
+      { id:'discipline', ico:'⚠️', label:'وضعیت انضباطی' },
+      { id:'notices', ico:'📢', label:'اطلاعیه‌ها' },
+      { id:'competitions', ico:'🏆', label:'مسابقات' },
+      { id:'messages', ico:'💬', label:'پیام‌رسانی' },
+      { id:'security', ico:'⚙️', label:'تنظیمات امنیتی' }
+    ]
+  };
+  const items = menus[currentUser.role] || [];
+  document.getElementById('navMenu').innerHTML = items.map(m =>
+    `<button class="nav-item" data-page="${m.id}" onclick="goTo('${m.id}')">
+       <span class="ico">${m.ico}</span> ${m.label}
+     </button>`
+  ).join('');
+}
+
+function toggleSidebar(){ document.getElementById('sidebar').classList.toggle('open'); }
+
+let currentPage = '';
+function goTo(page){
+  currentPage = page;
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.page===page));
+  document.getElementById('sidebar').classList.remove('open');
+  const render = pages[page];
+  if(render) render();
+  else document.getElementById('mainContent').innerHTML = emptyState('🚧','این بخش به‌زودی اضافه می‌شود.');
+}
+
+const pages = {};
+
+/* ---------- ابزار کمکی ---------- */
+function statCard(color, ico, val, lbl){
+  return `<div class="card stat">
+    <div class="stat-ico ${color}">${ico}</div>
+    <div><div class="stat-val">${val}</div><div class="stat-lbl">${lbl}</div></div>
+  </div>`;
+}
+function emptyState(ico, msg){
+  return `<div class="empty"><div class="ico">${ico}</div><div>${msg}</div></div>`;
+}
+function renderNoticesList(list){
+  if(!list.length) return emptyState('📭','اطلاعیه‌ای وجود ندارد');
+  return list.map(n => `
+    <div class="notice ${n.pinned?'pinned':''}">
+      <div class="notice-title">${n.pinned?'📌 ':''}${n.title}</div>
+      <div class="notice-body">${n.body}</div>
+      <div class="notice-meta"><span>👤 ${n.author}</span><span>📅 ${n.date}</span></div>
+    </div>
+  `).join('');
+}
+function getMyStudent(){
+  if(currentUser.role==='student') return currentUser;
+  if(currentUser.role==='parent'){
+    const students = DB.get('students',[]);
+    return students.find(s => s.tracking === currentUser.childTracking) || students[0];
+  }
+  return null;
+}
+
+/* ---------- محاسبات معدل ---------- */
+function calcAverageDetailed(gradesAll){
+  const all = [];
+  Object.values(gradesAll).forEach(lessonGrades => {
+    MONTHS.forEach(m => {
+      const mg = lessonGrades[m] || {};
+      Object.values(mg).forEach(v => { if(v!=null) all.push(Number(v)); });
+    });
+  });
+  if(!all.length) return 0;
+  return all.reduce((a,b)=>a+b,0)/all.length;
+}
+
+function calcAverageForMonth(gradesAll, month){
+  const all = [];
+  Object.values(gradesAll).forEach(lessonGrades => {
+    const mg = lessonGrades[month] || {};
+    Object.values(mg).forEach(v => { if(v!=null) all.push(Number(v)); });
+  });
+  if(!all.length) return null;
+  return all.reduce((a,b)=>a+b,0)/all.length;
+}
+
+function calcLessonMonthAvg(g, lesson, month){
+  const mg = (g[lesson]||{})[month] || {};
+  const vals = Object.values(mg).filter(v=>v!=null);
+  if(!vals.length) return null;
+  return vals.reduce((a,b)=>a+Number(b),0)/vals.length;
+}
+
+function calcLessonYearAvg(g, lesson){
+  const all = [];
+  MONTHS.forEach(m => {
+    const mg = (g[lesson]||{})[m] || {};
+    Object.values(mg).forEach(v => { if(v!=null) all.push(Number(v)); });
+  });
+  if(!all.length) return null;
+  return all.reduce((a,b)=>a+Number(b),0)/all.length;
+}
+
+/* ---------- محاسبه رتبه ---------- */
+function getStudentRank(student, grades, scope){
+  const allStudents = DB.get('students',[]);
+  let pool = allStudents;
+  if(scope === 'class'){
+    pool = allStudents.filter(s => s.class === student.class);
+  } else if(scope === 'grade'){
+    const gradeLevel = student.class.split(' ')[0];
+    pool = allStudents.filter(s => s.class.startsWith(gradeLevel));
+  }
+  const ranked = pool.map(s => ({
+    id: s.id,
+    avg: calcAverageDetailed(grades[s.id] || {})
+  })).filter(s => s.avg > 0).sort((a,b) => b.avg - a.avg);
+  const idx = ranked.findIndex(r => r.id === student.id);
+  return {
+    rank: idx > -1 ? idx + 1 : '—',
+    total: ranked.length
+  };
+}
+
+/* ---------- کامپوننت جستجوی دانش‌آموز ---------- */
+function studentSearchInput(inputId, selectedId, allowedClasses){
+  const students = DB.get('students',[]);
+  const filtered = allowedClasses 
+    ? students.filter(s => allowedClasses.includes(s.class))
+    : students;
+  const selected = selectedId ? filtered.find(s => s.id === selectedId) : null;
+  
+  return `
+    <div class="student-search-wrap">
+      <input type="text" id="${inputId}_search" 
+        value="${selected ? selected.name + ' — ' + selected.class : ''}"
+        placeholder="تایپ کنید: نام، نام خانوادگی یا کد ملی..." 
+        autocomplete="off"
+        oninput="filterStudentList('${inputId}')"
+        onfocus="filterStudentList('${inputId}')"
+        style="width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;">
+      <input type="hidden" id="${inputId}_value" value="${selectedId||''}">
+      <div id="${inputId}_list" class="student-search-list"></div>
+    </div>
+  `;
+}
+
+function filterStudentList(inputId){
+  const searchInput = document.getElementById(inputId + '_search');
+  const listDiv = document.getElementById(inputId + '_list');
+  if(!searchInput || !listDiv) return;
+  
+  const query = searchInput.value.trim().toLowerCase();
+  if(query.length < 1){
+    listDiv.classList.remove('show');
+    return;
+  }
+  
+  const students = DB.get('students',[]);
+  const allowedClasses = currentUser.role==='teacher' ? currentUser.classes : null;
+  const filtered = allowedClasses 
+    ? students.filter(s => allowedClasses.includes(s.class))
+    : students;
+  
+  const results = filtered.filter(s => {
+    const nameParts = s.name.toLowerCase().split(' ');
+    return s.name.toLowerCase().includes(query) ||
+           s.national.includes(query) ||
+           nameParts.some(part => part.startsWith(query));
+  }).slice(0, 30);
+  
+  if(!results.length){
+    listDiv.innerHTML = `<div style="padding:12px;color:var(--muted);font-size:13px;">نتیجه‌ای یافت نشد</div>`;
+    listDiv.classList.add('show');
+    return;
+  }
+  
+  listDiv.innerHTML = results.map(s => `
+    <div class="student-search-item" 
+      onclick="selectStudentFromList('${inputId}','${s.id}','${s.name.replace(/'/g,"\\'")}','${s.class}')">
+      <strong>${s.name}</strong>
+      <span class="meta"> — ${s.class}</span>
+      <span class="national">کد ملی: ${s.national}</span>
+    </div>
+  `).join('');
+  listDiv.classList.add('show');
+}
+
+function selectStudentFromList(inputId, studentId, studentName, studentClass){
+  document.getElementById(inputId + '_search').value = studentName + ' — ' + studentClass;
+  document.getElementById(inputId + '_value').value = studentId;
+  document.getElementById(inputId + '_list').classList.remove('show');
+}
+
+document.addEventListener('click', function(e){
+  document.querySelectorAll('.student-search-list').forEach(list => {
+    if(!list.parentElement.contains(e.target)){
+      list.classList.remove('show');
+    }
+  });
+});
+
+function closeModal(){
+  document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
+}
+
+/* ============================================================
+   سیستم پرینت عمومی
+   ============================================================ */
+function printHTML(title, bodyHTML){
+  const printHTML = `
+    <!DOCTYPE html>
+    <html dir="rtl" lang="fa">
+    <head>
+      <meta charset="UTF-8">
+      <title>${title}</title>
+      <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+      <style>
+        * { font-family: 'Vazirmatn', Tahoma, sans-serif; }
+        body { padding: 20px; max-width: 900px; margin: 0 auto; }
+        .header { text-align: center; border-bottom: 2px solid #1e40af; padding-bottom: 12px; margin-bottom: 16px; }
+        .header h1 { color: #1e40af; margin: 0 0 6px 0; font-size: 22px; }
+        .header p { margin: 3px 0; font-size: 13px; color: #555; }
+        .info { display: flex; justify-content: space-between; flex-wrap: wrap; margin-bottom: 16px; padding: 12px; background: #f8fafc; border-radius: 8px; font-size: 13px; }
+        .info div { margin: 4px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+        th { background: #1e40af; color: white; padding: 8px 6px; border: 1px solid #1e40af; text-align: right; }
+        td { border: 1px solid #ccc; padding: 6px; text-align: right; }
+        .card-print { border: 1px solid #ccc; padding: 10px; margin-bottom: 8px; border-radius: 6px; }
+        .footer { margin-top: 30px; display: flex; justify-content: space-between; font-size: 12px; color: #555; flex-wrap: wrap; gap: 10px; }
+        .signature { border-top: 1px dashed #999; padding-top: 5px; width: 180px; text-align: center; }
+        @media print { body { padding: 10px; } .no-print { display: none; } @page { size: A4; margin: 12mm; } }
+        .no-print { text-align: center; margin-bottom: 20px; }
+        .no-print button { padding: 10px 24px; background: #1e40af; color: white; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 14px; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+        .badge-green { background: #dcfce7; color: #166534; }
+        .badge-red { background: #fee2e2; color: #991b1b; }
+        .badge-orange { background: #ffedd5; color: #9a3412; }
+      </style>
+    </head>
+    <body>
+      <div class="no-print"><button onclick="window.print()">🖨️ پرینت / ذخیره PDF</button></div>
+      <div class="header">
+        <h1>🏫 سامانه مدرسه</h1>
+        <p>${title}</p>
+        <p>تاریخ چاپ: ${faDate()}</p>
+      </div>
+      ${bodyHTML}
+      <div class="footer">
+        <div class="signature">امضای معلم</div>
+        <div class="signature">امضای مدیر</div>
+      </div>
+    </body>
+    </html>
+  `;
+  const w = window.open('', '_blank');
+  w.document.write(printHTML);
+  w.document.close();
+}
+/* ============================================================
+   بخش ۴: داشبورد و نمرات
+   ============================================================ */
+
+/* ---------- داشبورد ---------- */
+pages.dashboard = function(){
+  const role = currentUser.role;
+  let stats = '', extra = '';
+
+  if(role==='admin'){
+    const students = DB.get('students',[]);
+    const teachers = DB.get('teachers',[]);
+    const notices = DB.get('notices',[]);
+    stats = `
+      ${statCard('bg-blue','👨‍🎓', students.length, 'دانش‌آموز')}
+      ${statCard('bg-green','👨‍🏫', teachers.length, 'معلم')}
+      ${statCard('bg-orange','🏫', DB.get('classes',[]).length, 'کلاس')}
+      ${statCard('bg-purple','📚', DB.get('lessons',[]).length, 'درس')}
+    `;
+    extra = `
+      <div class="card" style="margin-top:16px;">
+        <h3 style="margin-bottom:14px;color:var(--primary-dark);">آخرین اطلاعیه‌ها</h3>
+        ${renderNoticesList(notices.slice(-3).reverse())}
+      </div>
+      ${dataManagementPanel()}
+    `;
+  }
+  else if(role==='student' || role==='parent'){
+    const student = getMyStudent();
+    if(!student){
+      document.getElementById('mainContent').innerHTML = emptyState('👤','اطلاعاتی یافت نشد');
+      return;
+    }
+    const grades = DB.get('grades',{})[student.id] || {};
+    const avg = calcAverageDetailed(grades);
+    const homeworks = DB.get('homeworks',[]).filter(h => h.class === student.class);
+    const exams = DB.get('exams',[]).filter(e => e.class === student.class);
+    const discipline = DB.get('discipline',[]).filter(d => d.studentId === student.id);
+    stats = `
+      ${statCard('bg-blue','📊', avg ? avg.toFixed(2) : '—', 'معدل کل')}
+      ${statCard('bg-orange','📝', homeworks.length, 'تکلیف فعال')}
+      ${statCard('bg-purple','📅', exams.length, 'امتحان پیش‌رو')}
+      ${statCard('bg-red','⚠️', discipline.length, 'وضعیت انضباطی')}
+    `;
+    extra = `
+      <div class="grid grid-2" style="margin-top:16px;">
+        <div class="card">
+          <h3 style="margin-bottom:14px;color:var(--primary-dark);">آخرین نمرات</h3>
+          ${renderLatestGrades(grades)}
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:14px;color:var(--primary-dark);">اطلاعیه‌ها</h3>
+          ${renderNoticesList(DB.get('notices',[]).slice(-3).reverse())}
+        </div>
+      </div>
+    `;
+  }
+  else if(role==='teacher'){
+    const notices = DB.get('notices',[]);
+    const discipline = DB.get('discipline',[]).filter(d => currentUser.classes.includes(d.class));
+    stats = `
+      ${statCard('bg-blue','📚', currentUser.lessons.length, 'درس')}
+      ${statCard('bg-green','🏫', currentUser.classes.length, 'کلاس')}
+      ${statCard('bg-orange','📢', notices.length, 'اطلاعیه')}
+      ${statCard('bg-red','⚠️', discipline.length, 'وضعیت انضباطی')}
+    `;
+    extra = `
+      <div class="card" style="margin-top:16px;">
+        <h3 style="margin-bottom:14px;color:var(--primary-dark);">اطلاعیه‌های اخیر</h3>
+        ${renderNoticesList(notices.slice(-3).reverse())}
+      </div>
+    `;
+  }
+
+  document.getElementById('mainContent').innerHTML = `
+    <h2 class="page-title">سلام، ${currentUser.name} 👋</h2>
+    <p class="page-sub">به سامانه مدرسه خوش آمدید</p>
+    <div class="grid grid-4">${stats}</div>
+    ${extra}
+  `;
+};
+
+function renderLatestGrades(grades){
+  const lessons = DB.get('lessons',[]);
+  const items = lessons.map(l => {
+    const avg = calcLessonYearAvg(grades, l);
+    if(avg == null) return null;
+    return { lesson:l, avg };
+  }).filter(Boolean).slice(0, 6);
+  if(!items.length) return emptyState('📭','نمره‌ای ثبت نشده');
+  return `<div class="table-wrap"><table>
+    <thead><tr><th>درس</th><th>معدل</th><th>وضعیت</th></tr></thead>
+    <tbody>${items.map(i => `
+      <tr>
+        <td>${i.lesson}</td>
+        <td><strong>${i.avg.toFixed(2)}</strong></td>
+        <td>${i.avg>=17?'<span class="badge badge-green">عالی</span>':
+              i.avg>=14?'<span class="badge badge-blue">خوب</span>':
+              i.avg>=10?'<span class="badge badge-orange">قابل قبول</span>':
+              '<span class="badge badge-red">نیاز به تلاش</span>'}</td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+}
+
+/* ---------- نمرات ---------- */
+pages.grades = function(){
+  const role = currentUser.role;
+
+  /* دانش‌آموز / والد */
+  if(role==='student' || role==='parent'){
+    const student = getMyStudent();
+    if(!student) return;
+    const allGrades = DB.get('grades',{});
+    const gradesAll = allGrades[student.id] || {};
+    const lessons = DB.get('lessons',[]);
+
+    const summaryRows = lessons.map(l => {
+      const avg = calcLessonYearAvg(gradesAll, l);
+      return `<tr>
+        <td><strong>${l}</strong></td>
+        <td>${avg!=null ? avg.toFixed(2) : '—'}</td>
+        <td>${avg!=null ? (avg>=10?'<span class="badge badge-green">قبول</span>':'<span class="badge badge-red">تجدید</span>') : '—'}</td>
+        <td><button class="btn btn-sm btn-primary" style="padding:5px 10px;font-size:12px;" onclick="showDetailedGrades('${l}')">📋 جزئیات</button></td>
+      </tr>`;
+    }).join('');
+
+    const totalAvg = calcAverageDetailed(gradesAll);
+    const rClass = getStudentRank(student, allGrades, 'class');
+    const rGrade = getStudentRank(student, allGrades, 'grade');
+    const rSchool = getStudentRank(student, allGrades, 'school');
+
+    document.getElementById('mainContent').innerHTML = `
+      <div class="page-header-flex">
+        <div>
+          <h2 class="page-title">📊 کارنامه ${role==='parent'?'فرزند':'من'}</h2>
+          <p class="page-sub" style="margin:0;">${student.name} — کلاس ${student.class}</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="printReportCard('${student.id}')">🖨️ پرینت کل سال</button>
+      </div>
+      
+      <div class="grid grid-4" style="margin-bottom:20px;">
+        ${statCard('bg-blue','🎯', totalAvg.toFixed(2), 'معدل کل سال')}
+        ${statCard('bg-green','🥇', rClass.rank + ' / ' + rClass.total, 'رتبه کلاس')}
+        ${statCard('bg-orange','🏅', rGrade.rank + ' / ' + rGrade.total, 'رتبه پایه')}
+        ${statCard('bg-purple','🏆', rSchool.rank + ' / ' + rSchool.total, 'رتبه مدرسه')}
+      </div>
+
+      <div class="card" style="margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+          <h3 style="color:var(--primary-dark);margin:0;">کارنامه ماهانه</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <select id="monthSelect" onchange="showMonthReport('${student.id}', this.value)" 
+              style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;">
+              <option value="">— انتخاب ماه —</option>
+              ${MONTHS.map(m => `<option value="${m}">${m}</option>`).join('')}
+            </select>
+            <button class="btn btn-primary btn-sm" onclick="printMonthReport('${student.id}')">🖨️ پرینت ماه</button>
+          </div>
+        </div>
+        <div id="monthReportArea"></div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:14px;color:var(--primary-dark);">📚 معدل هر درس (کل سال)</h3>
+        <div class="table-wrap"><table>
+          <thead><tr><th>درس</th><th>معدل سال</th><th>وضعیت</th><th>جزئیات</th></tr></thead>
+          <tbody>${summaryRows}</tbody>
+        </table></div>
+      </div>
+    `;
+  }
+
+  /* معلم */
+  else if(role==='teacher'){
+    const cls = window._gradeClass || currentUser.classes[0];
+    const lesson = window._gradeLesson || currentUser.lessons[0];
+    const month = window._gradeMonth || 'مهر';
+    const students = DB.get('students',[]).filter(s => s.class===cls);
+    const grades = DB.get('grades',{});
+    
+    const rows = students.map(s => {
+      const g = ((grades[s.id]||{})[lesson]||{})[month] || {};
+      return `<tr>
+        <td>${s.name}</td>
+        ${[1,2,3,4,5].map(i => `
+          <td>
+            <input type="number" min="0" max="20" step="0.25" 
+              value="${g['n'+i] ?? ''}" 
+              style="width:65px;padding:5px;border:1px solid var(--border);border-radius:6px;text-align:center;font-family:inherit;"
+              onchange="saveOneGrade('${s.id}','${lesson}','${month}','n${i}',this.value)">
+          </td>
+        `).join('')}
+      </tr>`;
+    }).join('');
+
+    document.getElementById('mainContent').innerHTML = `
+      <div class="page-header-flex">
+        <div>
+          <h2 class="page-title">📊 ثبت نمرات</h2>
+          <p class="page-sub" style="margin:0;">کلاس ${cls} — درس ${lesson}</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="printClassGrades('${cls}','${lesson}','${month}')">🖨️ پرینت لیست</button>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="form-row">
+          <div class="field">
+            <label>کلاس</label>
+            <select onchange="window._gradeClass=this.value; pages.grades();">
+              ${currentUser.classes.map(c => `<option ${c===cls?'selected':''}>${c}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label>درس</label>
+            <select onchange="window._gradeLesson=this.value; pages.grades();">
+              ${currentUser.lessons.map(l => `<option ${l===lesson?'selected':''}>${l}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label>ماه</label>
+            <select onchange="window._gradeMonth=this.value; pages.grades();">
+              ${MONTHS.map(m => `<option ${m===month?'selected':''}>${m}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap"><table>
+          <thead><tr>
+            <th>دانش‌آموز</th>
+            <th>نمره ۱</th><th>نمره ۲</th><th>نمره ۳</th><th>نمره ۴</th><th>نمره ۵</th>
+          </tr></thead>
+          <tbody>${rows || '<tr><td colspan="6">'+emptyState('📭','دانش‌آموزی نیست')+'</td></tr>'}</tbody>
+        </table></div>
+      </div>
+    `;
+  }
+
+  /* مدیر */
+  else if(role==='admin'){
+    const classes = DB.get('classes',[]);
+    const lessons = DB.get('lessons',[]);
+    const cls = window._adminGradeClass || classes[0];
+    const lesson = window._adminGradeLesson || lessons[0];
+    const month = window._adminGradeMonth || 'مهر';
+    const students = DB.get('students',[]).filter(s => s.class===cls);
+    const grades = DB.get('grades',{});
+
+    const rows = students.slice(0, 100).map(s => {
+      const g = ((grades[s.id]||{})[lesson]||{})[month] || {};
+      return `<tr>
+        <td>${s.name}</td>
+        ${[1,2,3,4,5].map(i => `
+          <td>
+            <input type="number" min="0" max="20" step="0.25" 
+              value="${g['n'+i] ?? ''}" 
+              style="width:65px;padding:5px;border:1px solid var(--border);border-radius:6px;text-align:center;font-family:inherit;"
+              onchange="saveOneGrade('${s.id}','${lesson}','${month}','n${i}',this.value)">
+          </td>
+        `).join('')}
+      </tr>`;
+    }).join('');
+
+    document.getElementById('mainContent').innerHTML = `
+      <div class="page-header-flex">
+        <div>
+          <h2 class="page-title">📊 ثبت نمرات (مدیر)</h2>
+          <p class="page-sub" style="margin:0;">${students.length} دانش‌آموز در کلاس ${cls}</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="printClassGrades('${cls}','${lesson}','${month}')">🖨️ پرینت لیست</button>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="form-row">
+          <div class="field">
+            <label>کلاس</label>
+            <select onchange="window._adminGradeClass=this.value; pages.grades();">
+              ${classes.map(c => `<option ${c===cls?'selected':''}>${c}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label>درس</label>
+            <select onchange="window._adminGradeLesson=this.value; pages.grades();">
+              ${lessons.map(l => `<option ${l===lesson?'selected':''}>${l}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label>ماه</label>
+            <select onchange="window._adminGradeMonth=this.value; pages.grades();">
+              ${MONTHS.map(m => `<option ${m===month?'selected':''}>${m}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">💡 نمره‌ها به‌صورت خودکار ذخیره می‌شوند. بازه: ۰ تا ۲۰</p>
+        <div class="table-wrap"><table>
+          <thead><tr>
+            <th>دانش‌آموز</th>
+            <th>نمره ۱</th><th>نمره ۲</th><th>نمره ۳</th><th>نمره ۴</th><th>نمره ۵</th>
+          </tr></thead>
+          <tbody>${rows || '<tr><td colspan="6">'+emptyState('📭','دانش‌آموزی نیست')+'</td></tr>'}</tbody>
+        </table></div>
+      </div>
+    `;
+  }
+};
+
+function saveOneGrade(studentId, lesson, month, key, value){
+  const grades = DB.get('grades',{});
+  if(!grades[studentId]) grades[studentId] = {};
+  if(!grades[studentId][lesson]) grades[studentId][lesson] = {};
+  if(!grades[studentId][lesson][month]) grades[studentId][lesson][month] = {};
+  
+  if(value === '' || value === null){
+    delete grades[studentId][lesson][month][key];
+  } else {
+    const v = Math.min(20, Math.max(0, Number(value)));
+    grades[studentId][lesson][month][key] = v;
+  }
+  DB.set('grades', grades);
+}
+
+function showDetailedGrades(lesson){
+  const student = getMyStudent();
+  if(!student) return;
+  const g = ((DB.get('grades',{})[student.id]||{})[lesson]) || {};
+  
+  const rows = MONTHS.map(m => {
+    const monthGrades = g[m] || {};
+    const vals = [1,2,3,4,5].map(i => monthGrades['n'+i]);
+    const filled = vals.filter(v => v!=null);
+    const avg = filled.length ? (filled.reduce((a,b)=>a+Number(b),0)/filled.length).toFixed(2) : '—';
+    return `<tr>
+      <td><strong>${m}</strong></td>
+      ${vals.map(v => `<td>${v ?? '—'}</td>`).join('')}
+      <td><strong>${avg}</strong></td>
+    </tr>`;
+  }).join('');
+
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal" style="max-width:700px;">
+        <h3>📚 جزئیات نمرات: ${lesson}</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">${student.name} — کلاس ${student.class}</p>
+        <div class="table-wrap"><table>
+          <thead><tr>
+            <th>ماه</th><th>نمره ۱</th><th>نمره ۲</th><th>نمره ۳</th><th>نمره ۴</th><th>نمره ۵</th><th>معدل ماه</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">بستن</button>
+          <button class="btn btn-primary" onclick="printDetailedGrades('${lesson}')">🖨️ پرینت</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function printDetailedGrades(lesson){
+  const student = getMyStudent();
+  if(!student) return;
+  const g = ((DB.get('grades',{})[student.id]||{})[lesson]) || {};
+  
+  const rows = MONTHS.map(m => {
+    const monthGrades = g[m] || {};
+    const vals = [1,2,3,4,5].map(i => monthGrades['n'+i]);
+    const filled = vals.filter(v => v!=null);
+    const avg = filled.length ? (filled.reduce((a,b)=>a+Number(b),0)/filled.length).toFixed(2) : '—';
+    return `<tr>
+      <td><strong>${m}</strong></td>
+      ${vals.map(v => `<td>${v ?? '—'}</td>`).join('')}
+      <td><strong>${avg}</strong></td>
+    </tr>`;
+  }).join('');
+
+  const body = `
+    <div class="info">
+      <div><strong>نام:</strong> ${student.name}</div>
+      <div><strong>کلاس:</strong> ${student.class}</div>
+      <div><strong>درس:</strong> ${lesson}</div>
+    </div>
+    <table>
+      <thead><tr>
+        <th>ماه</th><th>نمره ۱</th><th>نمره ۲</th><th>نمره ۳</th><th>نمره ۴</th><th>نمره ۵</th><th>معدل ماه</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+  printHTML(`جزئیات نمرات ${lesson} — ${student.name}`, body);
+}
+
+function showMonthReport(studentId, month){
+  const area = document.getElementById('monthReportArea');
+  if(!area) return;
+  if(!month){ area.innerHTML = ''; return; }
+  
+  const gradesAll = DB.get('grades',{})[studentId] || {};
+  const lessons = DB.get('lessons',[]);
+  
+  const rows = lessons.map(l => {
+    const avg = calcLessonMonthAvg(gradesAll, l, month);
+    const mg = (gradesAll[l]||{})[month] || {};
+    return `<tr>
+      <td>${l}</td>
+      ${[1,2,3,4,5].map(i => `<td>${mg['n'+i] ?? '—'}</td>`).join('')}
+      <td><strong>${avg!=null ? avg.toFixed(2) : '—'}</strong></td>
+    </tr>`;
+  }).join('');
+
+  const monthAvg = calcAverageForMonth(gradesAll, month);
+  
+  area.innerHTML = `
+    <div style="background:#f8fafc;padding:12px;border-radius:10px;margin-bottom:12px;">
+      <strong>معدل ماه ${month}:</strong> 
+      <span style="color:var(--primary);font-size:18px;">${monthAvg!=null ? monthAvg.toFixed(2) : '—'}</span>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th>درس</th><th>نمره ۱</th><th>نمره ۲</th><th>نمره ۳</th><th>نمره ۴</th><th>نمره ۵</th><th>معدل</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+  `;
+}
+
+function printMonthReport(studentId){
+  const month = document.getElementById('monthSelect').value;
+  if(!month) return alert('ابتدا یک ماه را انتخاب کنید');
+  printReportCard(studentId, month);
+}
+
+/* ---------- پرینت کارنامه دانش‌آموز ---------- */
+function printReportCard(studentId, month){
+  const student = DB.get('students',[]).find(s => s.id === studentId);
+  if(!student) return;
+  const allGrades = DB.get('grades',{});
+  const gradesAll = allGrades[student.id] || {};
+  const lessons = DB.get('lessons',[]);
+  
+  const isMonth = !!month;
+  
+  let rankInfo = '';
+  if(!isMonth){
+    const rC = getStudentRank(student, allGrades, 'class');
+    const rG = getStudentRank(student, allGrades, 'grade');
+    const rS = getStudentRank(student, allGrades, 'school');
+    rankInfo = `
+      <div style="display:flex;justify-content:space-around;margin:15px 0;padding:12px;background:#f0f9ff;border-radius:8px;flex-wrap:wrap;gap:8px;">
+        <div><strong>رتبه در کلاس:</strong> ${rC.rank} از ${rC.total}</div>
+        <div><strong>رتبه در پایه:</strong> ${rG.rank} از ${rG.total}</div>
+        <div><strong>رتبه در مدرسه:</strong> ${rS.rank} از ${rS.total}</div>
+      </div>
+    `;
+  }
+
+  let tableRows = '';
+  if(isMonth){
+    tableRows = lessons.map(l => {
+      const mg = (gradesAll[l]||{})[month] || {};
+      const avg = calcLessonMonthAvg(gradesAll, l, month);
+      return `<tr>
+        <td style="border:1px solid #ccc;padding:6px;text-align:right;">${l}</td>
+        ${[1,2,3,4,5].map(i => `<td style="border:1px solid #ccc;padding:6px;text-align:center;">${mg['n'+i] ?? '—'}</td>`).join('')}
+        <td style="border:1px solid #ccc;padding:6px;text-align:center;"><strong>${avg!=null ? avg.toFixed(2) : '—'}</strong></td>
+      </tr>`;
+    }).join('');
+  } else {
+    tableRows = lessons.map(l => {
+      const yearAvg = calcLessonYearAvg(gradesAll, l);
+      return `<tr>
+        <td style="border:1px solid #ccc;padding:6px;text-align:right;">${l}</td>
+        ${MONTHS.map(m => {
+          const avg = calcLessonMonthAvg(gradesAll, l, m);
+          return `<td style="border:1px solid #ccc;padding:4px;text-align:center;font-size:11px;">${avg!=null ? avg.toFixed(1) : '—'}</td>`;
+        }).join('')}
+        <td style="border:1px solid #ccc;padding:6px;text-align:center;"><strong>${yearAvg!=null ? yearAvg.toFixed(2) : '—'}</strong></td>
+      </tr>`;
+    }).join('');
+  }
+
+  const totalAvg = isMonth ? calcAverageForMonth(gradesAll, month) : calcAverageDetailed(gradesAll);
+
+  const printHTMLDoc = `
+    <!DOCTYPE html>
+    <html dir="rtl" lang="fa">
+    <head>
+      <meta charset="UTF-8">
+      <title>کارنامه ${student.name}</title>
+      <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+      <style>
+        * { font-family: 'Vazirmatn', Tahoma, sans-serif; }
+        body { padding: 20px; max-width: 900px; margin: 0 auto; }
+        .header { text-align: center; border-bottom: 2px solid #1e40af; padding-bottom: 12px; margin-bottom: 16px; }
+        .header h1 { color: #1e40af; margin: 0 0 6px 0; font-size: 22px; }
+        .header p { margin: 3px 0; font-size: 13px; color: #555; }
+        .info { display: flex; justify-content: space-between; flex-wrap: wrap; margin-bottom: 16px; padding: 12px; background: #f8fafc; border-radius: 8px; font-size: 13px; }
+        .info div { margin: 4px 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+        th { background: #1e40af; color: white; padding: 8px 6px; border: 1px solid #1e40af; }
+        .total-avg { text-align: center; margin: 16px 0; padding: 12px; background: #dbeafe; border-radius: 8px; font-size: 16px; }
+        .footer { margin-top: 30px; display: flex; justify-content: space-between; font-size: 12px; color: #555; flex-wrap: wrap; gap: 10px; }
+        .signature { border-top: 1px dashed #999; padding-top: 5px; width: 180px; text-align: center; }
+        @media print { body { padding: 10px; } .no-print { display: none; } @page { size: A4; margin: 12mm; } }
+        .no-print { text-align: center; margin-bottom: 20px; }
+        .no-print button { padding: 10px 24px; background: #1e40af; color: white; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 14px; }
+      </style>
+    </head>
+    <body>
+      <div class="no-print"><button onclick="window.print()">🖨️ پرینت / ذخیره PDF</button></div>
+      <div class="header">
+        <h1>🏫 سامانه مدرسه</h1>
+        <p>کارنامه ${isMonth ? 'ماه ' + month : 'کل سال تحصیلی'}</p>
+        <p>تاریخ صدور: ${faDate()}</p>
+      </div>
+      <div class="info">
+        <div><strong>نام دانش‌آموز:</strong> ${student.name}</div>
+        <div><strong>کد ملی:</strong> ${student.national}</div>
+        <div><strong>کلاس:</strong> ${student.class}</div>
+        <div><strong>کد رهگیری:</strong> ${student.tracking}</div>
+      </div>
+      ${rankInfo}
+      <table>
+        <thead>
+          ${isMonth 
+            ? `<tr><th>درس</th><th>نمره ۱</th><th>نمره ۲</th><th>نمره ۳</th><th>نمره ۴</th><th>نمره ۵</th><th>معدل</th></tr>`
+            : `<tr><th>درس</th>${MONTHS.map(m => `<th style="font-size:11px;">${m}</th>`).join('')}<th>معدل سال</th></tr>`}
+        </thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+      <div class="total-avg">
+        <strong>معدل ${isMonth ? 'ماه ' + month : 'کل سال'}:</strong> 
+        <span style="color:#1e40af;font-size:22px;font-weight:800;">${totalAvg!=null ? totalAvg.toFixed(2) : '—'}</span>
+      </div>
+      <div class="footer">
+        <div class="signature">امضای معلم</div>
+        <div class="signature">امضای مدیر</div>
+        <div class="signature">امضای والد</div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  const w = window.open('', '_blank');
+  w.document.write(printHTMLDoc);
+  w.document.close();
+}
+
+/* ---------- پرینت لیست نمرات کلاس ---------- */
+function printClassGrades(cls, lesson, month){
+  const students = DB.get('students',[]).filter(s => s.class === cls);
+  const grades = DB.get('grades',{});
+  
+  const rows = students.map((s, i) => {
+    const g = ((grades[s.id]||{})[lesson]||{})[month] || {};
+    const vals = [1,2,3,4,5].map(k => g['n'+k]);
+    const filled = vals.filter(v=>v!=null);
+    const avg = filled.length ? (filled.reduce((a,b)=>a+Number(b),0)/filled.length).toFixed(2) : '—';
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${s.name}</td>
+      <td>${s.national}</td>
+      ${vals.map(v => `<td>${v ?? '—'}</td>`).join('')}
+      <td><strong>${avg}</strong></td>
+    </tr>`;
+  }).join('');
+
+  const body = `
+    <div class="info">
+      <div><strong>کلاس:</strong> ${cls}</div>
+      <div><strong>درس:</strong> ${lesson}</div>
+      <div><strong>ماه:</strong> ${month}</div>
+      <div><strong>تعداد دانش‌آموز:</strong> ${students.length}</div>
+    </div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>نام</th><th>کد ملی</th>
+        <th>نمره ۱</th><th>نمره ۲</th><th>نمره ۳</th><th>نمره ۴</th><th>نمره ۵</th>
+        <th>معدل</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+  printHTML(`لیست نمرات ${lesson} — کلاس ${cls} — ماه ${month}`, body);
+}
+/* ============================================================
+   بخش ۵: دانش‌آموزان و کلاس‌ها (با پرینت)
+   ============================================================ */
+
+/* ---------- دانش‌آموزان (مدیر) ---------- */
+pages.students = function(){
+  const students = DB.get('students',[]);
+  const classes = DB.get('classes',[]);
+  let filterClass = window._filterClass || '';
+  let filterSearch = window._filterSearch || '';
+
+  function renderTable(){
+    let list = students;
+    if(filterClass) list = list.filter(s => s.class === filterClass);
+    if(filterSearch){
+      const q = filterSearch.toLowerCase();
+      list = list.filter(s => 
+        s.name.toLowerCase().includes(q) || 
+        s.national.includes(q) ||
+        s.tracking.includes(q)
+      );
+    }
+    const page = list.slice(0, 100);
+    return `
+      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">
+        نمایش ${page.length} از ${list.length} دانش‌آموز
+      </p>
+      <div class="table-wrap"><table>
+        <thead><tr>
+          <th>#</th><th>نام</th><th>کد ملی</th><th>کلاس</th>
+          <th>کد رهگیری</th><th>پدر</th><th>مادر</th><th>شاد</th><th>عملیات</th>
+        </tr></thead>
+        <tbody>${page.map((s,i) => `
+          <tr>
+            <td>${i+1}</td><td>${s.name}</td><td>${s.national}</td>
+            <td>${s.class}</td><td><code>${s.tracking}</code></td>
+            <td>${s.father}</td><td>${s.mother}</td><td>${s.shad}</td>
+            <td style="white-space:nowrap;">
+              <button class="btn btn-sm btn-primary" style="padding:5px 9px;font-size:12px;" onclick="editStudent('${s.id}')">✏️</button>
+              <button class="btn btn-sm" style="padding:5px 9px;font-size:12px;background:#fee2e2;color:#991b1b;" onclick="deleteStudent('${s.id}')">🗑️</button>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>
+    `;
+  }
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="page-header-flex">
+      <div>
+        <h2 class="page-title">👨‍🎓 دانش‌آموزان</h2>
+        <p class="page-sub" style="margin:0;">مجموع ${students.length} دانش‌آموز در ${classes.length} کلاس</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="printStudentsList()">🖨️ پرینت لیست</button>
+        <button class="btn btn-primary btn-sm" onclick="addStudent()">+ افزودن دانش‌آموز</button>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px;">
+      <div class="form-row">
+        <div class="field">
+          <label>جستجو (نام / کد ملی / کد رهگیری)</label>
+          <input id="searchStu" value="${filterSearch}" placeholder="...">
+        </div>
+        <div class="field">
+          <label>کلاس</label>
+          <select id="filterCls">
+            <option value="">همه کلاس‌ها</option>
+            ${classes.map(c => `<option ${c===filterClass?'selected':''}>${c}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field" style="display:flex;align-items:flex-end;">
+          <button class="btn btn-primary" onclick="applyStudentFilter()">اعمال فیلتر</button>
+        </div>
+      </div>
+    </div>
+    <div id="studentsTable">${renderTable()}</div>
+  `;
+};
+
+function applyStudentFilter(){
+  window._filterClass = document.getElementById('filterCls').value;
+  window._filterSearch = document.getElementById('searchStu').value;
+  pages.students();
+}
+
+function studentFormFields(s){
+  s = s || {};
+  const classes = DB.get('classes',[]);
+  return `
+    <div class="field"><label>نام و نام خانوادگی</label><input id="fsName" value="${s.name||''}"></div>
+    <div class="field"><label>کد ملی</label><input id="fsNational" value="${s.national||''}" maxlength="10"></div>
+    <div class="field"><label>کلاس</label><select id="fsClass">
+      ${classes.map(c => `<option ${c===(s.class||'')?'selected':''}>${c}</option>`).join('')}
+    </select></div>
+    <div class="field"><label>کد رهگیری</label><input id="fsTracking" value="${s.tracking||''}"></div>
+    <div class="field"><label>شماره پدر</label><input id="fsFather" value="${s.father||''}"></div>
+    <div class="field"><label>شماره مادر</label><input id="fsMother" value="${s.mother||''}"></div>
+    <div class="field"><label>شماره شاد</label><input id="fsShad" value="${s.shad||''}"></div>
+    <div class="field"><label>رمز عبور</label><input id="fsPass" value="${s.pass||''}"></div>
+  `;
+}
+
+function addStudent(){
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>افزودن دانش‌آموز جدید</h3>
+        ${studentFormFields(null)}
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">لغو</button>
+          <button class="btn btn-primary" onclick="saveStudent(null)">ذخیره</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function editStudent(id){
+  const s = DB.get('students',[]).find(x => x.id === id);
+  if(!s) return;
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>ویرایش دانش‌آموز</h3>
+        ${studentFormFields(s)}
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">لغو</button>
+          <button class="btn btn-primary" onclick="saveStudent('${id}')">ذخیره تغییرات</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function saveStudent(id){
+  const name = document.getElementById('fsName').value.trim();
+  const national = document.getElementById('fsNational').value.trim();
+  const cls = document.getElementById('fsClass').value;
+  const tracking = document.getElementById('fsTracking').value.trim();
+  const father = document.getElementById('fsFather').value.trim();
+  const mother = document.getElementById('fsMother').value.trim();
+  const shad = document.getElementById('fsShad').value.trim();
+  const pass = document.getElementById('fsPass').value.trim();
+
+  if(!name) return alert('نام را وارد کنید');
+  if(!/^\d{10}$/.test(national)) return alert('کد ملی باید ۱۰ رقم باشد');
+
+  const students = DB.get('students',[]);
+  if(id){
+    const idx = students.findIndex(s => s.id === id);
+    if(idx > -1){
+      students[idx] = { ...students[idx], name, national, class: cls, tracking, father, mother, shad, pass };
+      DB.set('students', students);
+      alert('✅ اطلاعات به‌روزرسانی شد');
+    }
+  } else {
+    if(students.find(s => s.national === national)) return alert('این کد ملی تکراری است');
+    const newId = 's' + Date.now();
+    students.push({
+      id: newId, name, national, class: cls,
+      tracking: tracking || genTracking(),
+      father, mother, shad, pass: pass || '123456',
+      createdAt: faDate()
+    });
+    DB.set('students', students);
+    // ساخت ساختار نمرات
+    const grades = DB.get('grades',{});
+    grades[newId] = {};
+    LESSONS.forEach(l => {
+      grades[newId][l] = {};
+      MONTHS.forEach(m => { grades[newId][l][m] = {}; });
+    });
+    DB.set('grades', grades);
+    alert('✅ دانش‌آموز جدید اضافه شد');
+  }
+  closeModal();
+  pages.students();
+}
+
+function deleteStudent(id){
+  const s = DB.get('students',[]).find(x => x.id === id);
+  if(!s) return;
+  if(!confirm(`از حذف «${s.name}» مطمئن هستید؟`)) return;
+  const newList = DB.get('students',[]).filter(x => x.id !== id);
+  DB.set('students', newList);
+  const grades = DB.get('grades',{});
+  delete grades[id];
+  DB.set('grades', grades);
+  alert('✅ دانش‌آموز حذف شد');
+  pages.students();
+}
+
+function printStudentsList(){
+  const students = DB.get('students',[]);
+  const filterClass = window._filterClass || '';
+  const filterSearch = window._filterSearch || '';
+  
+  let list = students;
+  if(filterClass) list = list.filter(s => s.class === filterClass);
+  if(filterSearch){
+    const q = filterSearch.toLowerCase();
+    list = list.filter(s => 
+      s.name.toLowerCase().includes(q) || 
+      s.national.includes(q) ||
+      s.tracking.includes(q)
+    );
+  }
+  
+  const rows = list.map((s,i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td>${s.name}</td>
+      <td>${s.national}</td>
+      <td>${s.class}</td>
+      <td>${s.father}</td>
+      <td>${s.mother}</td>
+      <td>${s.shad}</td>
+    </tr>
+  `).join('');
+  
+  const filterInfo = [];
+  if(filterClass) filterInfo.push(`کلاس: ${filterClass}`);
+  if(filterSearch) filterInfo.push(`جستجو: ${filterSearch}`);
+  
+  const body = `
+    <div class="info">
+      <div><strong>تعداد کل:</strong> ${list.length} دانش‌آموز</div>
+      ${filterInfo.length ? `<div><strong>فیلترها:</strong> ${filterInfo.join(' | ')}</div>` : ''}
+    </div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>نام و نام خانوادگی</th><th>کد ملی</th><th>کلاس</th>
+        <th>تلفن پدر</th><th>تلفن مادر</th><th>شماره شاد</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+  printHTML(`لیست دانش‌آموزان ${filterClass ? '— ' + filterClass : ''}`, body);
+}
+
+/* ---------- کلاس‌ها (مدیر) ---------- */
+pages.classes = function(){
+  const classes = DB.get('classes',[]);
+  const students = DB.get('students',[]);
+  const body = classes.map(c => {
+    const count = students.filter(s => s.class === c).length;
+    const cap = 35;
+    const pct = Math.round(count/cap*100);
+    const safeName = c.replace(/'/g, "\\'");
+    return `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+          <strong style="font-size:15px;">🏫 ${c}</strong>
+          <span class="badge ${count>=30?'badge-orange':'badge-green'}">${count} / ${cap}</span>
+        </div>
+        <div class="progress"><div class="progress-bar" style="width:${pct}%;background:${count>=30?'var(--warning)':'var(--success)'}"></div></div>
+        <div style="display:flex;gap:6px;margin-top:12px;">
+          <button class="btn btn-sm btn-primary" style="flex:1;padding:6px;font-size:12px;" onclick="editClass('${safeName}')">✏️ ویرایش</button>
+          <button class="btn btn-sm" style="flex:1;padding:6px;font-size:12px;background:#fee2e2;color:#991b1b;" onclick="deleteClass('${safeName}')">🗑️ حذف</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="page-header-flex">
+      <div>
+        <h2 class="page-title">🏫 کلاس‌ها</h2>
+        <p class="page-sub" style="margin:0;">${classes.length} کلاس — ${students.length} دانش‌آموز</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="printClassesList()">🖨️ پرینت لیست</button>
+        <button class="btn btn-primary btn-sm" onclick="addClass()">+ افزودن کلاس</button>
+      </div>
+    </div>
+    <div class="grid grid-3">${body}</div>
+  `;
+};
+
+function addClass(){
+  const name = prompt('نام کلاس جدید را وارد کنید:\nمثلاً: هفتم ه');
+  if(!name || !name.trim()) return;
+  const classes = DB.get('classes',[]);
+  if(classes.includes(name.trim())) return alert('این کلاس قبلاً وجود دارد');
+  classes.push(name.trim());
+  DB.set('classes', classes);
+  alert('✅ کلاس اضافه شد');
+  pages.classes();
+}
+
+function editClass(oldName){
+  const newName = prompt('نام جدید کلاس:', oldName);
+  if(!newName || !newName.trim() || newName.trim() === oldName) return;
+  const classes = DB.get('classes',[]);
+  const idx = classes.indexOf(oldName);
+  if(idx === -1) return;
+  if(classes.includes(newName.trim())) return alert('این نام قبلاً استفاده شده');
+  
+  classes[idx] = newName.trim();
+  DB.set('classes', classes);
+
+  const students = DB.get('students',[]);
+  students.forEach(s => { if(s.class === oldName) s.class = newName.trim(); });
+  DB.set('students', students);
+
+  const homeworks = DB.get('homeworks',[]);
+  homeworks.forEach(h => { if(h.class === oldName) h.class = newName.trim(); });
+  DB.set('homeworks', homeworks);
+
+  const exams = DB.get('exams',[]);
+  exams.forEach(e => { if(e.class === oldName) e.class = newName.trim(); });
+  DB.set('exams', exams);
+
+  const teachers = DB.get('teachers',[]);
+  teachers.forEach(t => {
+    const i = t.classes.indexOf(oldName);
+    if(i > -1) t.classes[i] = newName.trim();
+  });
+  DB.set('teachers', teachers);
+
+  const discipline = DB.get('discipline',[]);
+  discipline.forEach(d => { if(d.class === oldName) d.class = newName.trim(); });
+  DB.set('discipline', discipline);
+
+  alert('✅ نام کلاس تغییر کرد');
+  pages.classes();
+}
+
+function deleteClass(name){
+  const students = DB.get('students',[]);
+  const count = students.filter(s => s.class === name).length;
+  if(count > 0){
+    if(!confirm(`این کلاس ${count} دانش‌آموز دارد!\nآیا مطمئن هستید؟ دانش‌آموزان بدون کلاس می‌شوند.`)) return;
+    students.forEach(s => { if(s.class === name) s.class = '— بدون کلاس —'; });
+    DB.set('students', students);
+  }
+  if(!confirm(`از حذف کلاس «${name}» مطمئن هستید؟`)) return;
+  const classes = DB.get('classes',[]).filter(c => c !== name);
+  DB.set('classes', classes);
+  alert('✅ کلاس حذف شد');
+  pages.classes();
+}
+
+function printClassesList(){
+  const classes = DB.get('classes',[]);
+  const students = DB.get('students',[]);
+  
+  const rows = classes.map((c, i) => {
+    const count = students.filter(s => s.class === c).length;
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${c}</td>
+      <td>${count}</td>
+      <td>${35 - count > 0 ? (35 - count) : 'تکمیل'}</td>
+    </tr>`;
+  }).join('');
+  
+  const body = `
+    <div class="info">
+      <div><strong>تعداد کلاس‌ها:</strong> ${classes.length}</div>
+      <div><strong>تعداد کل دانش‌آموزان:</strong> ${students.length}</div>
+    </div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>نام کلاس</th><th>تعداد دانش‌آموز</th><th>ظرفیت باقی‌مانده</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+  printHTML('لیست کلاس‌ها', body);
+}
+/* ============================================================
+   بخش ۶: تکالیف، امتحانات، اطلاعیه‌ها، مسابقات (با پرینت)
+   ============================================================ */
+
+/* ---------- تکالیف ---------- */
+pages.homeworks = function(){
+  const role = currentUser.role;
+  let list = DB.get('homeworks',[]);
+
+  if(role==='student' || role==='parent'){
+    const student = getMyStudent();
+    if(student) list = list.filter(h => h.class === student.class);
+    else list = [];
+  } else if(role==='teacher'){
+    list = list.filter(h => currentUser.classes.includes(h.class));
+  }
+
+  const canAdd = role==='admin' || role==='teacher';
+  const canEdit = role==='admin';
+
+  const body = list.length ? list.map(h => `
+    <div class="notice">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+        <div style="flex:1;">
+          <div class="notice-title">📝 ${h.title}</div>
+          <div class="notice-body">${h.desc}</div>
+          <div class="notice-meta">
+            <span>📚 ${h.lesson}</span>
+            <span>🏫 ${h.class}</span>
+            <span>⏰ مهلت: ${h.deadline}</span>
+            <span>👤 ${h.author || 'نامشخص'}</span>
+          </div>
+        </div>
+        ${canEdit ? `<div style="display:flex;gap:6px;">
+          <button class="btn btn-sm btn-primary" style="padding:5px 10px;font-size:12px;" onclick="editHomework('${h.id}')">✏️</button>
+          <button class="btn btn-sm" style="padding:5px 10px;font-size:12px;background:#fee2e2;color:#991b1b;" onclick="deleteHomework('${h.id}')">🗑️</button>
+        </div>` : ''}
+      </div>
+    </div>
+  `).join('') : emptyState('📭','تکلیفی وجود ندارد');
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="page-header-flex">
+      <div>
+        <h2 class="page-title">📝 تکالیف</h2>
+        <p class="page-sub" style="margin:0;">${list.length} تکلیف</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="printHomeworksList()">🖨️ پرینت لیست</button>
+        ${canAdd ? `<button class="btn btn-primary btn-sm" onclick="addHomework()">+ ثبت تکلیف جدید</button>` : ''}
+      </div>
+    </div>
+    ${body}
+  `;
+};
+
+function homeworkFormFields(h){
+  h = h || {};
+  const classes = currentUser.role==='admin' ? DB.get('classes',[]) : currentUser.classes;
+  const lessons = currentUser.role==='admin' ? DB.get('lessons',[]) : currentUser.lessons;
+  return `
+    <div class="field"><label>عنوان تکلیف</label><input id="hwTitle" value="${h.title||''}" placeholder="مثلاً تمرین فصل ۳"></div>
+    <div class="field"><label>درس</label><select id="hwLesson">
+      ${lessons.map(l => `<option ${l===(h.lesson||'')?'selected':''}>${l}</option>`).join('')}
+    </select></div>
+    <div class="field"><label>کلاس</label><select id="hwClass">
+      ${classes.map(c => `<option ${c===(h.class||'')?'selected':''}>${c}</option>`).join('')}
+    </select></div>
+    <div class="field"><label>توضیحات</label><textarea id="hwDesc" rows="4">${h.desc||''}</textarea></div>
+    <div class="field"><label>مهلت (مثلاً 1404/08/15)</label><input id="hwDeadline" value="${h.deadline||''}"></div>
+  `;
+}
+
+function addHomework(){
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>📝 ثبت تکلیف جدید</h3>
+        ${homeworkFormFields(null)}
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">لغو</button>
+          <button class="btn btn-primary" onclick="saveHomework(null)">ذخیره</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function editHomework(id){
+  const h = DB.get('homeworks',[]).find(x => x.id === id);
+  if(!h) return;
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>✏️ ویرایش تکلیف</h3>
+        ${homeworkFormFields(h)}
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">لغو</button>
+          <button class="btn btn-primary" onclick="saveHomework('${id}')">ذخیره تغییرات</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function saveHomework(id){
+  const title = document.getElementById('hwTitle').value.trim();
+  const lesson = document.getElementById('hwLesson').value;
+  const cls = document.getElementById('hwClass').value;
+  const desc = document.getElementById('hwDesc').value.trim();
+  const deadline = document.getElementById('hwDeadline').value.trim();
+  
+  if(!title) return alert('عنوان را وارد کنید');
+  if(!deadline) return alert('مهلت را وارد کنید');
+
+  const list = DB.get('homeworks',[]);
+  if(id){
+    const idx = list.findIndex(x => x.id === id);
+    if(idx > -1){
+      list[idx] = { ...list[idx], title, lesson, class: cls, desc, deadline };
+      DB.set('homeworks', list);
+      alert('✅ تکلیف ویرایش شد');
+    }
+  } else {
+    list.push({ id: 'h' + Date.now(), title, lesson, class: cls, desc, deadline, author: currentUser.name, createdAt: faDate() });
+    DB.set('homeworks', list);
+    alert('✅ تکلیف جدید ثبت شد');
+  }
+  closeModal();
+  pages.homeworks();
+}
+
+function deleteHomework(id){
+  if(!confirm('از حذف این تکلیف مطمئن هستید؟')) return;
+  const list = DB.get('homeworks',[]).filter(x => x.id !== id);
+  DB.set('homeworks', list);
+  alert('✅ حذف شد');
+  pages.homeworks();
+}
+
+function printHomeworksList(){
+  const role = currentUser.role;
+  let list = DB.get('homeworks',[]);
+  if(role==='student' || role==='parent'){
+    const student = getMyStudent();
+    if(student) list = list.filter(h => h.class === student.class);
+  } else if(role==='teacher'){
+    list = list.filter(h => currentUser.classes.includes(h.class));
+  }
+  
+  const rows = list.map((h, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td><strong>${h.title}</strong></td>
+      <td>${h.lesson}</td>
+      <td>${h.class}</td>
+      <td>${h.deadline}</td>
+      <td>${h.author || '—'}</td>
+    </tr>
+  `).join('');
+  
+  const body = `
+    <div class="info">
+      <div><strong>تعداد تکالیف:</strong> ${list.length}</div>
+    </div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>عنوان</th><th>درس</th><th>کلاس</th><th>مهلت</th><th>ثبت‌کننده</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+  printHTML('لیست تکالیف', body);
+}
+
+/* ---------- امتحانات ---------- */
+pages.exams = function(){
+  const role = currentUser.role;
+  let list = DB.get('exams',[]);
+
+  if(role==='student' || role==='parent'){
+    const student = getMyStudent();
+    if(student) list = list.filter(e => e.class === student.class);
+    else list = [];
+  } else if(role==='teacher'){
+    list = list.filter(e => currentUser.classes.includes(e.class));
+  }
+
+  const canAdd = role==='admin' || role==='teacher';
+  const canEdit = role==='admin';
+
+  const body = list.length ? `<div class="table-wrap"><table>
+    <thead><tr>
+      <th>امتحان</th><th>درس</th><th>کلاس</th><th>تاریخ</th><th>ساعت</th><th>مدت</th>
+      ${canEdit ? '<th>عملیات</th>' : ''}
+    </tr></thead>
+    <tbody>${list.map(e => `
+      <tr>
+        <td><strong>${e.title}</strong></td>
+        <td>${e.lesson}</td>
+        <td>${e.class}</td>
+        <td>${e.date}</td>
+        <td>${e.time}</td>
+        <td>${e.duration} دقیقه</td>
+        ${canEdit ? `<td style="white-space:nowrap;">
+          <button class="btn btn-sm btn-primary" style="padding:5px 9px;font-size:12px;" onclick="editExam('${e.id}')">✏️</button>
+          <button class="btn btn-sm" style="padding:5px 9px;font-size:12px;background:#fee2e2;color:#991b1b;" onclick="deleteExam('${e.id}')">🗑️</button>
+        </td>` : ''}
+      </tr>`).join('')}</tbody>
+  </table></div>` : emptyState('📭','امتحانی ثبت نشده');
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="page-header-flex">
+      <div>
+        <h2 class="page-title">📅 امتحانات</h2>
+        <p class="page-sub" style="margin:0;">${list.length} امتحان</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="printExamsList()">🖨️ پرینت لیست</button>
+        ${canAdd ? `<button class="btn btn-primary btn-sm" onclick="addExam()">+ ثبت امتحان جدید</button>` : ''}
+      </div>
+    </div>
+    ${body}
+  `;
+};
+
+function examFormFields(e){
+  e = e || {};
+  const classes = currentUser.role==='admin' ? DB.get('classes',[]) : currentUser.classes;
+  const lessons = currentUser.role==='admin' ? DB.get('lessons',[]) : currentUser.lessons;
+  return `
+    <div class="field"><label>عنوان امتحان</label><input id="exTitle" value="${e.title||''}" placeholder="مثلاً امتحان فصل ۲"></div>
+    <div class="field"><label>درس</label><select id="exLesson">
+      ${lessons.map(l => `<option ${l===(e.lesson||'')?'selected':''}>${l}</option>`).join('')}
+    </select></div>
+    <div class="field"><label>کلاس</label><select id="exClass">
+      ${classes.map(c => `<option ${c===(e.class||'')?'selected':''}>${c}</option>`).join('')}
+    </select></div>
+    <div class="field"><label>تاریخ (مثلاً 1404/08/15)</label><input id="exDate" value="${e.date||''}"></div>
+    <div class="field"><label>ساعت (مثلاً 10:00)</label><input id="exTime" value="${e.time||''}" placeholder="10:00"></div>
+    <div class="field"><label>مدت (دقیقه)</label><input id="exDuration" type="number" value="${e.duration||60}"></div>
+  `;
+}
+
+function addExam(){
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>📅 ثبت امتحان جدید</h3>
+        ${examFormFields(null)}
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">لغو</button>
+          <button class="btn btn-primary" onclick="saveExam(null)">ذخیره</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function editExam(id){
+  const e = DB.get('exams',[]).find(x => x.id === id);
+  if(!e) return;
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>✏️ ویرایش امتحان</h3>
+        ${examFormFields(e)}
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">لغو</button>
+          <button class="btn btn-primary" onclick="saveExam('${id}')">ذخیره تغییرات</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function saveExam(id){
+  const title = document.getElementById('exTitle').value.trim();
+  const lesson = document.getElementById('exLesson').value;
+  const cls = document.getElementById('exClass').value;
+  const date = document.getElementById('exDate').value.trim();
+  const time = document.getElementById('exTime').value.trim();
+  const duration = Number(document.getElementById('exDuration').value) || 60;
+
+  if(!title) return alert('عنوان را وارد کنید');
+  if(!date) return alert('تاریخ را وارد کنید');
+
+  const list = DB.get('exams',[]);
+  if(id){
+    const idx = list.findIndex(x => x.id === id);
+    if(idx > -1){
+      list[idx] = { ...list[idx], title, lesson, class: cls, date, time, duration };
+      DB.set('exams', list);
+      alert('✅ امتحان ویرایش شد');
+    }
+  } else {
+    list.push({ id: 'e' + Date.now(), title, lesson, class: cls, date, time, duration, author: currentUser.name });
+    DB.set('exams', list);
+    alert('✅ امتحان جدید ثبت شد');
+  }
+  closeModal();
+  pages.exams();
+}
+
+function deleteExam(id){
+  if(!confirm('از حذف این امتحان مطمئن هستید؟')) return;
+  const list = DB.get('exams',[]).filter(x => x.id !== id);
+  DB.set('exams', list);
+  alert('✅ حذف شد');
+  pages.exams();
+}
+
+function printExamsList(){
+  const role = currentUser.role;
+  let list = DB.get('exams',[]);
+  if(role==='student' || role==='parent'){
+    const student = getMyStudent();
+    if(student) list = list.filter(e => e.class === student.class);
+  } else if(role==='teacher'){
+    list = list.filter(e => currentUser.classes.includes(e.class));
+  }
+  
+  const rows = list.map((e, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td><strong>${e.title}</strong></td>
+      <td>${e.lesson}</td>
+      <td>${e.class}</td>
+      <td>${e.date}</td>
+      <td>${e.time}</td>
+      <td>${e.duration} دقیقه</td>
+    </tr>
+  `).join('');
+  
+  const body = `
+    <div class="info">
+      <div><strong>تعداد امتحانات:</strong> ${list.length}</div>
+    </div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>عنوان</th><th>درس</th><th>کلاس</th><th>تاریخ</th><th>ساعت</th><th>مدت</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+  printHTML('لیست امتحانات', body);
+}
+
+/* ---------- اطلاعیه‌ها ---------- */
+pages.notices = function(){
+  const notices = DB.get('notices',[]).slice().reverse();
+  const canAdd = currentUser.role==='admin' || currentUser.role==='teacher';
+  const canEdit = currentUser.role==='admin';
+  document.getElementById('mainContent').innerHTML = `
+    <div class="page-header-flex">
+      <div>
+        <h2 class="page-title">📢 اطلاعیه‌ها</h2>
+        <p class="page-sub" style="margin:0;">${notices.length} اطلاعیه</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="printNoticesList()">🖨️ پرینت لیست</button>
+        ${canAdd ? `<button class="btn btn-primary btn-sm" onclick="showAddNotice()">+ اطلاعیه جدید</button>` : ''}
+      </div>
+    </div>
+    ${notices.map(n => `
+      <div class="notice ${n.pinned?'pinned':''}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;">
+            <div class="notice-title">${n.pinned?'📌 ':''}${n.title}</div>
+            <div class="notice-body">${n.body}</div>
+            <div class="notice-meta"><span>👤 ${n.author}</span><span>📅 ${n.date}</span></div>
+          </div>
+          ${canEdit ? `<div style="display:flex;gap:6px;">
+            <button class="btn btn-sm btn-primary" style="padding:5px 10px;font-size:12px;" onclick="editNotice('${n.id}')">✏️</button>
+            <button class="btn btn-sm" style="padding:5px 10px;font-size:12px;background:#fee2e2;color:#991b1b;" onclick="deleteNotice('${n.id}')">🗑️</button>
+          </div>` : ''}
+        </div>
+      </div>`).join('') || emptyState('📭','اطلاعیه‌ای وجود ندارد')}
+  `;
+};
+
+function showAddNotice(){
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>اطلاعیه جدید</h3>
+        <div class="field"><label>عنوان</label><input id="nTitle"></div>
+        <div class="field"><label>متن</label><textarea id="nBody" rows="4"></textarea></div>
+        <div class="field"><label><input type="checkbox" id="nPin"> سنجاق شود</label></div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">لغو</button>
+          <button class="btn btn-primary" onclick="saveNotice(null)">ذخیره</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function editNotice(id){
+  const n = DB.get('notices',[]).find(x => x.id === id);
+  if(!n) return;
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>ویرایش اطلاعیه</h3>
+        <div class="field"><label>عنوان</label><input id="nTitle" value="${n.title}"></div>
+        <div class="field"><label>متن</label><textarea id="nBody" rows="4">${n.body}</textarea></div>
+        <div class="field"><label><input type="checkbox" id="nPin" ${n.pinned?'checked':''}> سنجاق شود</label></div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">لغو</button>
+          <button class="btn btn-primary" onclick="saveNotice('${id}')">ذخیره تغییرات</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function saveNotice(id){
+  const title = document.getElementById('nTitle').value.trim();
+  const body = document.getElementById('nBody').value.trim();
+  const pinned = document.getElementById('nPin').checked;
+  if(!title || !body) return alert('عنوان و متن را وارد کنید');
+  const notices = DB.get('notices',[]);
+  if(id){
+    const idx = notices.findIndex(x => x.id === id);
+    if(idx > -1){
+      notices[idx] = { ...notices[idx], title, body, pinned };
+      DB.set('notices', notices);
+      alert('✅ ویرایش شد');
+    }
+  } else {
+    notices.push({ id:'n'+Date.now(), title, body, pinned, date: faDate(), author: currentUser.name });
+    DB.set('notices', notices);
+    alert('✅ ثبت شد');
+  }
+  closeModal();
+  pages.notices();
+}
+
+function deleteNotice(id){
+  if(!confirm('از حذف این اطلاعیه مطمئن هستید؟')) return;
+  const list = DB.get('notices',[]).filter(x => x.id !== id);
+  DB.set('notices', list);
+  alert('✅ حذف شد');
+  pages.notices();
+}
+
+function printNoticesList(){
+  const notices = DB.get('notices',[]).slice().reverse();
+  const body = notices.map((n, i) => `
+    <div class="card-print">
+      <div style="font-weight:700;color:#1e40af;margin-bottom:6px;">${i+1}. ${n.pinned?'📌 ':''}${n.title}</div>
+      <div style="font-size:12.5px;line-height:1.8;margin-bottom:6px;">${n.body}</div>
+      <div style="font-size:11px;color:#666;">👤 ${n.author} — 📅 ${n.date}</div>
+    </div>
+  `).join('');
+  
+  const fullBody = `
+    <div class="info">
+      <div><strong>تعداد اطلاعیه‌ها:</strong> ${notices.length}</div>
+    </div>
+    ${body || '<p style="text-align:center;color:#888;">اطلاعیه‌ای وجود ندارد</p>'}
+  `;
+  printHTML('لیست اطلاعیه‌ها', fullBody);
+}
+
+/* ---------- مسابقات ---------- */
+pages.competitions = function(){
+  const list = DB.get('competitions',[]);
+  const canAdd = currentUser.role==='admin';
+  const canEdit = currentUser.role==='admin';
+  const body = list.length ? list.map(c => `
+    <div class="notice" style="border-right-color:var(--warning);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+        <div style="flex:1;">
+          <div class="notice-title">🏆 ${c.title}</div>
+          <div class="notice-body">${c.desc}</div>
+          <div class="notice-meta">
+            <span>⏰ مهلت: ${c.deadline}</span>
+            <span>🎁 ${c.prize}</span>
+          </div>
+        </div>
+        ${canEdit ? `<div style="display:flex;gap:6px;">
+          <button class="btn btn-sm btn-primary" style="padding:5px 10px;font-size:12px;" onclick="editComp('${c.id}')">✏️</button>
+          <button class="btn btn-sm" style="padding:5px 10px;font-size:12px;background:#fee2e2;color:#991b1b;" onclick="deleteComp('${c.id}')">🗑️</button>
+        </div>` : ''}
+      </div>
+    </div>
+  `).join('') : emptyState('🏆','مسابقه‌ای ثبت نشده');
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="page-header-flex">
+      <div>
+        <h2 class="page-title">🏆 مسابقات</h2>
+        <p class="page-sub" style="margin:0;">${list.length} مسابقه فعال</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="printCompetitionsList()">🖨️ پرینت لیست</button>
+        ${canAdd ? `<button class="btn btn-primary btn-sm" onclick="showAddComp()">+ مسابقه جدید</button>` : ''}
+      </div>
+    </div>
+    ${body}
+  `;
+};
+
+function showAddComp(){
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>مسابقه جدید</h3>
+        <div class="field"><label>عنوان</label><input id="cTitle"></div>
+        <div class="field"><label>توضیحات</label><textarea id="cDesc" rows="3"></textarea></div>
+        <div class="field"><label>مهلت</label><input id="cDeadline" placeholder="مثلاً 1404/08/15"></div>
+        <div class="field"><label>جایزه</label><input id="cPrize"></div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">لغو</button>
+          <button class="btn btn-primary" onclick="saveComp(null)">ذخیره</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function editComp(id){
+  const c = DB.get('competitions',[]).find(x => x.id === id);
+  if(!c) return;
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>ویرایش مسابقه</h3>
+        <div class="field"><label>عنوان</label><input id="cTitle" value="${c.title}"></div>
+        <div class="field"><label>توضیحات</label><textarea id="cDesc" rows="3">${c.desc}</textarea></div>
+        <div class="field"><label>مهلت</label><input id="cDeadline" value="${c.deadline}"></div>
+        <div class="field"><label>جایزه</label><input id="cPrize" value="${c.prize}"></div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">لغو</button>
+          <button class="btn btn-primary" onclick="saveComp('${id}')">ذخیره تغییرات</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function saveComp(id){
+  const title = document.getElementById('cTitle').value.trim();
+  const desc = document.getElementById('cDesc').value.trim();
+  const deadline = document.getElementById('cDeadline').value.trim();
+  const prize = document.getElementById('cPrize').value.trim();
+  if(!title) return alert('عنوان را وارد کنید');
+  const list = DB.get('competitions',[]);
+  if(id){
+    const idx = list.findIndex(x => x.id === id);
+    if(idx > -1){
+      list[idx] = { ...list[idx], title, desc, deadline, prize };
+      DB.set('competitions', list);
+      alert('✅ ویرایش شد');
+    }
+  } else {
+    list.push({ id:'c'+Date.now(), title, desc, deadline, prize });
+    DB.set('competitions', list);
+    alert('✅ ثبت شد');
+  }
+  closeModal();
+  pages.competitions();
+}
+
+function deleteComp(id){
+  if(!confirm('از حذف این مسابقه مطمئن هستید؟')) return;
+  const list = DB.get('competitions',[]).filter(x => x.id !== id);
+  DB.set('competitions', list);
+  alert('✅ حذف شد');
+  pages.competitions();
+}
+
+function printCompetitionsList(){
+  const list = DB.get('competitions',[]);
+  const rows = list.map((c, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td><strong>${c.title}</strong></td>
+      <td>${c.deadline}</td>
+      <td>${c.prize}</td>
+    </tr>
+  `).join('');
+  const body = `
+    <div class="info">
+      <div><strong>تعداد مسابقات:</strong> ${list.length}</div>
+    </div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>عنوان</th><th>مهلت</th><th>جایزه</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+  printHTML('لیست مسابقات', body);
+}
+/* ============================================================
+   بخش ۷: پیام‌رسانی و تنظیمات امنیتی
+   ============================================================ */
+
+/* ---------- پیام‌رسانی ---------- */
+pages.messages = function(){
+  const all = DB.get('messages',[]);
+  const me = currentUser.id;
+  const contacts = getContacts();
+  const chatWith = window._chatWith || null;
+  
+  let chat = [];
+  let chatTitle = 'گفتگو';
+  if(chatWith){
+    chat = all.filter(m => 
+      (m.from===me && m.to===chatWith.id) || (m.from===chatWith.id && m.to===me)
+    );
+    chatTitle = 'گفتگو با ' + chatWith.name;
+  }
+
+  const chatHtml = chat.length ? chat.map(m => {
+    const mine = m.from===me;
+    return `<div class="msg ${mine?'msg-me':'msg-other'}">
+      <div>${m.text}</div>
+      <div class="msg-meta">${mine?'شما':m.fromName} — ${m.time}</div>
+    </div>`;
+  }).join('') : emptyState('💬', chatWith ? 'شروع گفتگو کنید' : 'یک مخاطب را انتخاب کنید');
+
+  document.getElementById('mainContent').innerHTML = `
+    <h2 class="page-title">💬 پیام‌رسانی</h2>
+    <p class="page-sub">ارتباط با معلم / مدیر / دانش‌آموز</p>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3 style="margin-bottom:14px;color:var(--primary-dark);">مخاطبین</h3>
+        <div class="field" style="margin-bottom:10px;">
+          <input type="text" id="contactSearch" placeholder="جستجوی مخاطب..." 
+            oninput="filterContacts()"
+            style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:13px;">
+        </div>
+        <div id="contactsList" style="max-height:400px;overflow-y:auto;">
+          ${contacts.length ? contacts.map(c => `
+            <div class="contact-item" data-search="${c.name}" 
+              style="padding:10px;border-bottom:1px solid var(--border);cursor:pointer;background:${chatWith && chatWith.id===c.id?'var(--bg)':'transparent'};border-radius:6px;" 
+              onclick="selectChatContact('${c.id}','${c.name.replace(/'/g,"\\'")}')">
+              <strong>${c.name}</strong>
+              <div style="font-size:12px;color:var(--muted);">${c.role}</div>
+            </div>
+          `).join('') : emptyState('👥','مخاطبی نیست')}
+        </div>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;max-height:520px;">
+        <h3 style="margin-bottom:14px;color:var(--primary-dark);">${chatTitle}</h3>
+        <div class="msg-list" style="flex:1;">${chatHtml}</div>
+        ${chatWith ? `
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <input id="msgInput" placeholder="پیام..." style="flex:1;padding:10px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;">
+            <button class="btn btn-primary btn-sm" onclick="sendMsg()">ارسال</button>
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+};
+
+function filterContacts(){
+  const q = document.getElementById('contactSearch').value.trim().toLowerCase();
+  document.querySelectorAll('.contact-item').forEach(item => {
+    const text = item.getAttribute('data-search').toLowerCase();
+    item.style.display = text.includes(q) ? 'block' : 'none';
+  });
+}
+
+function selectChatContact(id, name){
+  window._chatWith = { id, name };
+  pages.messages();
+}
+
+function getContacts(){
+  const me = currentUser;
+  const contacts = [];
+  if(me.role==='student' || me.role==='parent'){
+    DB.get('teachers',[]).forEach(t => contacts.push({ id:t.id, name:t.name, role:'معلم' }));
+    DB.get('admins',[]).forEach(a => contacts.push({ id:a.id, name:a.name, role:'مدیر' }));
+  } else if(me.role==='teacher'){
+    const students = DB.get('students',[]).filter(s => me.classes.includes(s.class)).slice(0, 100);
+    students.forEach(s => contacts.push({ id:s.id, name:s.name, role:'دانش‌آموز ' + s.class }));
+    DB.get('admins',[]).forEach(a => contacts.push({ id:a.id, name:a.name, role:'مدیر' }));
+  } else if(me.role==='admin'){
+    DB.get('teachers',[]).forEach(t => contacts.push({ id:t.id, name:t.name, role:'معلم' }));
+    const students = DB.get('students',[]).slice(0, 100);
+    students.forEach(s => contacts.push({ id:s.id, name:s.name, role:'دانش‌آموز ' + s.class }));
+  }
+  return contacts;
+}
+
+function sendMsg(){
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim();
+  if(!text) return;
+  if(!window._chatWith) return alert('ابتدا یک مخاطب را انتخاب کنید');
+  const all = DB.get('messages',[]);
+  const now = new Date();
+  all.push({
+    id:'m'+Date.now(),
+    from: currentUser.id, fromName: currentUser.name,
+    to: window._chatWith.id,
+    text, time: faDate() + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes())
+  });
+  DB.set('messages', all);
+  input.value = '';
+  pages.messages();
+}
+
+/* ---------- تنظیمات امنیتی ---------- */
+pages.security = function(){
+  document.getElementById('mainContent').innerHTML = `
+    <h2 class="page-title">⚙️ تنظیمات امنیتی</h2>
+    <p class="page-sub">مدیریت رمز عبور و امنیت حساب</p>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3 style="margin-bottom:14px;color:var(--primary-dark);">تغییر رمز عبور</h3>
+        <div class="field"><label>رمز فعلی</label><input type="password" id="oldPass"></div>
+        <div class="field"><label>رمز جدید</label><input type="password" id="newPass"></div>
+        <div class="field"><label>تکرار رمز جدید</label><input type="password" id="newPass2"></div>
+        <button class="btn btn-primary" onclick="changePassword()">تغییر رمز</button>
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:14px;color:var(--primary-dark);">اطلاعات حساب</h3>
+        <p style="font-size:14px;line-height:2;">
+          <strong>نام:</strong> ${currentUser.name}<br>
+          <strong>نقش:</strong> ${{student:'دانش‌آموز',parent:'والد',teacher:'معلم',admin:'مدیر'}[currentUser.role]}<br>
+          ${currentUser.tracking ? `<strong>کد رهگیری:</strong> ${currentUser.tracking}<br>` : ''}
+          ${currentUser.class ? `<strong>کلاس:</strong> ${currentUser.class}<br>` : ''}
+        </p>
+      </div>
+    </div>
+  `;
+};
+
+function changePassword(){
+  const oldP = document.getElementById('oldPass').value;
+  const newP = document.getElementById('newPass').value;
+  const newP2 = document.getElementById('newPass2').value;
+  if(oldP !== currentUser.pass) return alert('رمز فعلی اشتباه است');
+  if(newP.length < 6) return alert('رمز جدید باید حداقل ۶ کاراکتر باشد');
+  if(newP !== newP2) return alert('تکرار رمز مطابقت ندارد');
+
+  const roleMap = { student:'students', parent:'parents', teacher:'teachers', admin:'admins' };
+  const key = roleMap[currentUser.role];
+  const list = DB.get(key,[]);
+  const idx = list.findIndex(u => u.id === currentUser.id);
+  if(idx > -1){
+    list[idx].pass = newP;
+    DB.set(key, list);
+    currentUser.pass = newP;
+    DB.set('currentUser', currentUser);
+    alert('✅ رمز با موفقیت تغییر کرد');
+    pages.security();
+  }
+}
+/* ============================================================
+   بخش ۸: وضعیت انضباطی (با پرینت و جستجو)
+   ============================================================ */
+
+pages.discipline = function(){
+  const role = currentUser.role;
+  const types = DB.get('disciplineTypes',[]);
+  const all = DB.get('discipline',[]);
+
+  /* دانش‌آموز / والد */
+  if(role==='student' || role==='parent'){
+    const student = getMyStudent();
+    if(!student) return;
+    const myList = all.filter(d => d.studentId === student.id).reverse();
+
+    const body = myList.length ? myList.map(d => `
+      <div class="notice" style="border-right-color:var(--danger);background:#fef2f2;">
+        <div class="notice-title" style="color:var(--danger);">⚠️ ${d.type}</div>
+        <div class="notice-body">${d.desc || '—'}</div>
+        <div class="notice-meta">
+          <span>📅 تاریخ: ${d.date}</span>
+          <span>👤 ثبت‌کننده: ${d.author}</span>
+        </div>
+      </div>
+    `).join('') : emptyState('✅','هیچ مورد انضباطی ثبت نشده — آفرین!');
+
+    document.getElementById('mainContent').innerHTML = `
+      <div class="page-header-flex">
+        <div>
+          <h2 class="page-title">⚠️ وضعیت انضباطی</h2>
+          <p class="page-sub" style="margin:0;">${student.name} — کلاس ${student.class}</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="printStudentDiscipline('${student.id}')">🖨️ پرینت</button>
+      </div>
+      <div class="card" style="margin-bottom:16px;background:#f0f9ff;">
+        <strong>تعداد کل موارد:</strong> 
+        <span style="font-size:22px;color:var(--danger);font-weight:800;">${myList.length}</span>
+      </div>
+      ${body}
+    `;
+    return;
+  }
+
+  /* معلم / مدیر */
+  let filterClass = window._discFilterClass || (role==='teacher' ? currentUser.classes[0] : '');
+  let filterType = window._discFilterType || '';
+  let filterSearch = (window._discSearch || '').toLowerCase();
+
+  let allowedClasses;
+  if(role==='teacher'){
+    allowedClasses = currentUser.classes;
+  } else {
+    allowedClasses = DB.get('classes',[]);
+  }
+
+  let list = all.slice().reverse();
+  if(filterClass) list = list.filter(d => d.class === filterClass);
+  if(filterType) list = list.filter(d => d.type === filterType);
+  if(filterSearch) list = list.filter(d => 
+    d.studentName.toLowerCase().includes(filterSearch) ||
+    (d.desc||'').toLowerCase().includes(filterSearch)
+  );
+
+  const body = list.length ? list.slice(0, 100).map(d => `
+    <div class="notice" style="border-right-color:var(--danger);background:#fef2f2;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
+        <div style="flex:1;">
+          <div class="notice-title" style="color:var(--danger);">⚠️ ${d.type} — ${d.studentName}</div>
+          <div class="notice-body">${d.desc || '—'}</div>
+          <div class="notice-meta">
+            <span>🏫 ${d.class}</span>
+            <span>📅 ${d.date}</span>
+            <span>👤 ${d.author}</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-sm btn-primary" style="padding:5px 10px;font-size:12px;" onclick="editDiscipline('${d.id}')">✏️</button>
+          <button class="btn btn-sm" style="padding:5px 10px;font-size:12px;background:#fee2e2;color:#991b1b;" onclick="deleteDiscipline('${d.id}')">🗑️</button>
+        </div>
+      </div>
+    </div>
+  `).join('') : emptyState('📭','موردی ثبت نشده');
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="page-header-flex">
+      <div>
+        <h2 class="page-title">⚠️ وضعیت انضباطی</h2>
+        <p class="page-sub" style="margin:0;">${list.length} مورد</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="printDisciplineList()">🖨️ پرینت لیست</button>
+        ${role==='admin' ? `<button class="btn btn-outline btn-sm" onclick="manageDisciplineTypes()">⚙️ مدیریت انواع</button>` : ''}
+        <button class="btn btn-primary btn-sm" onclick="addDiscipline()">+ ثبت مورد جدید</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+      <div class="form-row">
+        <div class="field">
+          <label>جستجو (نام دانش‌آموز / توضیحات)</label>
+          <input id="discSearch" value="${window._discSearch || ''}" placeholder="جستجو...">
+        </div>
+        <div class="field">
+          <label>فیلتر کلاس</label>
+          <select id="discFilterCls">
+            <option value="">همه کلاس‌ها</option>
+            ${allowedClasses.map(c => `<option ${c===filterClass?'selected':''}>${c}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label>فیلتر نوع</label>
+          <select id="discFilterType">
+            <option value="">همه انواع</option>
+            ${types.map(t => `<option ${t===filterType?'selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field" style="display:flex;align-items:flex-end;gap:6px;">
+          <button class="btn btn-primary" style="flex:1;" onclick="applyDiscFilter()">اعمال فیلتر</button>
+          <button class="btn btn-outline" onclick="clearDiscFilter()">پاک کردن</button>
+        </div>
+      </div>
+    </div>
+
+    ${body}
+  `;
+};
+
+function applyDiscFilter(){
+  window._discSearch = document.getElementById('discSearch').value;
+  window._discFilterClass = document.getElementById('discFilterCls').value;
+  window._discFilterType = document.getElementById('discFilterType').value;
+  pages.discipline();
+}
+
+function clearDiscFilter(){
+  window._discSearch = '';
+  window._discFilterClass = '';
+  window._discFilterType = '';
+  pages.discipline();
+}
+
+function addDiscipline(){
+  const allowedClasses = currentUser.role==='teacher' ? currentUser.classes : null;
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>⚠️ ثبت مورد انضباطی</h3>
+        <div class="field">
+          <label>دانش‌آموز</label>
+          ${studentSearchInput('discStudent', '', allowedClasses)}
+        </div>
+        <div class="field">
+          <label>نوع مورد</label>
+          <select id="discType">
+            ${DB.get('disciplineTypes',[]).map(t => `<option>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>تاریخ</label><input id="discDate" value="${faDate()}"></div>
+        <div class="field"><label>توضیحات (اختیاری)</label><textarea id="discDesc" rows="3"></textarea></div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">لغو</button>
+          <button class="btn btn-primary" onclick="saveDiscipline(null)">ذخیره</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function editDiscipline(id){
+  const d = DB.get('discipline',[]).find(x => x.id === id);
+  if(!d) return;
+  const types = DB.get('disciplineTypes',[]);
+  const allowedClasses = currentUser.role==='teacher' ? currentUser.classes : null;
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>✏️ ویرایش مورد انضباطی</h3>
+        <div class="field">
+          <label>دانش‌آموز</label>
+          ${studentSearchInput('discStudent', d.studentId, allowedClasses)}
+        </div>
+        <div class="field">
+          <label>نوع مورد</label>
+          <select id="discType">
+            ${types.map(t => `<option ${t===d.type?'selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>تاریخ</label><input id="discDate" value="${d.date||''}"></div>
+        <div class="field"><label>توضیحات (اختیاری)</label><textarea id="discDesc" rows="3">${d.desc||''}</textarea></div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">لغو</button>
+          <button class="btn btn-primary" onclick="saveDiscipline('${id}')">ذخیره تغییرات</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function saveDiscipline(id){
+  const studentId = document.getElementById('discStudent_value').value;
+  const type = document.getElementById('discType').value;
+  const date = document.getElementById('discDate').value.trim();
+  const desc = document.getElementById('discDesc').value.trim();
+
+  if(!studentId) return alert('دانش‌آموز را انتخاب کنید');
+  if(!type) return alert('نوع را انتخاب کنید');
+  if(!date) return alert('تاریخ را وارد کنید');
+
+  const student = DB.get('students',[]).find(s => s.id === studentId);
+  if(!student) return alert('دانش‌آموز یافت نشد');
+
+  const list = DB.get('discipline',[]);
+  if(id){
+    const idx = list.findIndex(x => x.id === id);
+    if(idx > -1){
+      list[idx] = { ...list[idx], studentId, studentName: student.name, class: student.class, type, date, desc };
+      DB.set('discipline', list);
+      alert('✅ ویرایش شد');
+    }
+  } else {
+    list.push({
+      id: 'd' + Date.now(),
+      studentId, studentName: student.name, class: student.class,
+      type, date, desc,
+      author: currentUser.name
+    });
+    DB.set('discipline', list);
+    alert('✅ ثبت شد');
+  }
+  closeModal();
+  pages.discipline();
+}
+
+function deleteDiscipline(id){
+  if(!confirm('از حذف این مورد مطمئن هستید؟')) return;
+  const list = DB.get('discipline',[]).filter(x => x.id !== id);
+  DB.set('discipline', list);
+  alert('✅ حذف شد');
+  pages.discipline();
+}
+
+function manageDisciplineTypes(){
+  const types = DB.get('disciplineTypes',[]);
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>⚙️ مدیریت انواع وضعیت انضباطی</h3>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">می‌توانید انواع موارد را اضافه، ویرایش یا حذف کنید.</p>
+        <div id="typesList">
+          ${types.map((t, i) => `
+            <div style="display:flex;gap:6px;margin-bottom:8px;">
+              <input id="type_${i}" value="${t}" style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;">
+              <button class="btn btn-sm" style="padding:8px 12px;background:#fee2e2;color:#991b1b;" onclick="this.parentElement.remove()">🗑️</button>
+            </div>
+          `).join('')}
+        </div>
+        <button class="btn btn-outline" style="margin-top:8px;" onclick="addTypeField()">+ افزودن مورد جدید</button>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">لغو</button>
+          <button class="btn btn-primary" onclick="saveDisciplineTypes()">ذخیره</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function addTypeField(){
+  const list = document.getElementById('typesList');
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:6px;margin-bottom:8px;';
+  div.innerHTML = `
+    <input placeholder="نوع جدید..." style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;">
+    <button class="btn btn-sm" style="padding:8px 12px;background:#fee2e2;color:#991b1b;" onclick="this.parentElement.remove()">🗑️</button>
+  `;
+  list.appendChild(div);
+}
+
+function saveDisciplineTypes(){
+  const inputs = document.querySelectorAll('#typesList input');
+  const newTypes = [];
+  inputs.forEach(inp => {
+    const v = inp.value.trim();
+    if(v) newTypes.push(v);
+  });
+  if(!newTypes.length) return alert('حداقل یک مورد وارد کنید');
+  DB.set('disciplineTypes', newTypes);
+  alert('✅ انواع ذخیره شد');
+  closeModal();
+  pages.discipline();
+}
+
+/* ---------- پرینت کارنامه انضباطی دانش‌آموز ---------- */
+function printStudentDiscipline(studentId){
+  const student = DB.get('students',[]).find(s => s.id === studentId);
+  if(!student) return;
+  const list = DB.get('discipline',[]).filter(d => d.studentId === studentId).reverse();
+  
+  const rows = list.map((d, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td><strong>${d.type}</strong></td>
+      <td>${d.date}</td>
+      <td>${d.desc || '—'}</td>
+      <td>${d.author}</td>
+    </tr>
+  `).join('');
+  
+  const body = `
+    <div class="info">
+      <div><strong>نام دانش‌آموز:</strong> ${student.name}</div>
+      <div><strong>کد ملی:</strong> ${student.national}</div>
+      <div><strong>کلاس:</strong> ${student.class}</div>
+      <div><strong>تعداد موارد:</strong> ${list.length}</div>
+    </div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>نوع</th><th>تاریخ</th><th>توضیحات</th><th>ثبت‌کننده</th>
+      </tr></thead>
+      <tbody>${rows || '<tr><td colspan="5" style="text-align:center;">موردی ثبت نشده</td></tr>'}</tbody>
+    </table>
+  `;
+  printHTML(`کارنامه انضباطی — ${student.name}`, body);
+}
+
+/* ---------- پرینت لیست موارد انضباطی ---------- */
+function printDisciplineList(){
+  const role = currentUser.role;
+  let list = DB.get('discipline',[]);
+  const filterClass = window._discFilterClass || (role==='teacher' ? currentUser.classes[0] : '');
+  const filterType = window._discFilterType || '';
+  const filterSearch = (window._discSearch || '').toLowerCase();
+  
+  if(role==='teacher'){
+    list = list.filter(d => currentUser.classes.includes(d.class));
+  }
+  if(filterClass) list = list.filter(d => d.class === filterClass);
+  if(filterType) list = list.filter(d => d.type === filterType);
+  if(filterSearch) list = list.filter(d => 
+    d.studentName.toLowerCase().includes(filterSearch) ||
+    (d.desc||'').toLowerCase().includes(filterSearch)
+  );
+  
+  list = list.reverse();
+  
+  const rows = list.map((d, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td>${d.studentName}</td>
+      <td>${d.class}</td>
+      <td><strong>${d.type}</strong></td>
+      <td>${d.date}</td>
+      <td>${d.desc || '—'}</td>
+    </tr>
+  `).join('');
+  
+  const filterInfo = [];
+  if(filterClass) filterInfo.push(`کلاس: ${filterClass}`);
+  if(filterType) filterInfo.push(`نوع: ${filterType}`);
+  if(filterSearch) filterInfo.push(`جستجو: ${filterSearch}`);
+  
+  const body = `
+    <div class="info">
+      <div><strong>تعداد کل:</strong> ${list.length}</div>
+      ${filterInfo.length ? `<div><strong>فیلتر:</strong> ${filterInfo.join(' | ')}</div>` : ''}
+    </div>
+    <table>
+      <thead><tr>
+        <th>#</th><th>دانش‌آموز</th><th>کلاس</th><th>نوع</th><th>تاریخ</th><th>توضیحات</th>
+      </tr></thead>
+      <tbody>${rows || '<tr><td colspan="6" style="text-align:center;">موردی ثبت نشده</td></tr>'}</tbody>
+    </table>
+  `;
+  printHTML('لیست موارد انضباطی' + (filterClass ? ' — ' + filterClass : ''), body);
+}
+/* ============================================================
+   بخش ۹: کارنامه دانش‌آموزان (فقط مدیر)
+   ============================================================ */
+
+pages.reportcards = function(){
+  const classes = DB.get('classes',[]);
+  const filterClass = window._rcClass || '';
+  const filterSearch = (window._rcSearch || '').toLowerCase();
+  
+  let list = DB.get('students',[]);
+  if(filterClass) list = list.filter(s => s.class === filterClass);
+  if(filterSearch){
+    list = list.filter(s => 
+      s.name.toLowerCase().includes(filterSearch) || 
+      s.national.includes(filterSearch) ||
+      s.tracking.includes(filterSearch)
+    );
+  }
+  
+  const page = list.slice(0, 100);
+  const allGrades = DB.get('grades',{});
+  
+  const rows = page.map((s, i) => {
+    const avg = calcAverageDetailed(allGrades[s.id] || {});
+    const rC = getStudentRank(s, allGrades, 'class');
+    return `
+      <tr>
+        <td>${i+1}</td>
+        <td><strong>${s.name}</strong></td>
+        <td>${s.national}</td>
+        <td>${s.class}</td>
+        <td>${avg > 0 ? avg.toFixed(2) : '—'}</td>
+        <td>${rC.rank} / ${rC.total}</td>
+        <td style="white-space:nowrap;">
+          <button class="btn btn-sm btn-primary" style="padding:5px 12px;font-size:12px;" onclick="viewReportCard('${s.id}')">📊 مشاهده کارنامه</button>
+        </td>
+      </tr>`;
+  }).join('');
+  
+  document.getElementById('mainContent').innerHTML = `
+    <div class="page-header-flex">
+      <div>
+        <h2 class="page-title">📋 کارنامه دانش‌آموزان</h2>
+        <p class="page-sub" style="margin:0;">مشاهده و پرینت کارنامه هر دانش‌آموز</p>
+      </div>
+    </div>
+    
+    <div class="card" style="margin-bottom:16px;">
+      <div class="form-row">
+        <div class="field">
+          <label>جستجو (نام / کد ملی / کد رهگیری)</label>
+          <input id="rcSearch" value="${window._rcSearch || ''}" placeholder="مثلاً علی یا 1000000001">
+        </div>
+        <div class="field">
+          <label>کلاس</label>
+          <select id="rcClass">
+            <option value="">همه کلاس‌ها</option>
+            ${classes.map(c => `<option ${c===filterClass?'selected':''}>${c}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field" style="display:flex;align-items:flex-end;gap:6px;">
+          <button class="btn btn-primary" style="flex:1;" onclick="applyRCFilter()">اعمال فیلتر</button>
+          <button class="btn btn-outline" onclick="clearRCFilter()">پاک کردن</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">
+        نمایش ${page.length} از ${list.length} دانش‌آموز
+      </p>
+      ${page.length ? `
+        <div class="table-wrap"><table>
+          <thead><tr>
+            <th>#</th><th>نام</th><th>کد ملی</th><th>کلاس</th>
+            <th>معدل کل</th><th>رتبه کلاس</th><th>عملیات</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+      ` : emptyState('📭','دانش‌آموزی یافت نشد')}
+    </div>
+  `;
+};
+
+function applyRCFilter(){
+  window._rcClass = document.getElementById('rcClass').value;
+  window._rcSearch = document.getElementById('rcSearch').value;
+  pages.reportcards();
+}
+
+function clearRCFilter(){
+  window._rcClass = '';
+  window._rcSearch = '';
+  pages.reportcards();
+}
+
+function viewReportCard(studentId){
+  const student = DB.get('students',[]).find(s => s.id === studentId);
+  if(!student) return;
+  
+  const allGrades = DB.get('grades',{});
+  const gradesAll = allGrades[student.id] || {};
+  const lessons = DB.get('lessons',[]);
+  
+  const totalAvg = calcAverageDetailed(gradesAll);
+  const rClass = getStudentRank(student, allGrades, 'class');
+  const rGrade = getStudentRank(student, allGrades, 'grade');
+  const rSchool = getStudentRank(student, allGrades, 'school');
+  
+  const summaryRows = lessons.map(l => {
+    const avg = calcLessonYearAvg(gradesAll, l);
+    return `<tr>
+      <td><strong>${l}</strong></td>
+      <td>${avg != null ? avg.toFixed(2) : '—'}</td>
+      <td>${avg != null ? (avg>=10?'<span class="badge badge-green">قبول</span>':'<span class="badge badge-red">تجدید</span>') : '—'}</td>
+    </tr>`;
+  }).join('');
+  
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal" style="max-width:800px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+          <div>
+            <h3 style="margin:0 0 4px 0;">📊 کارنامه ${student.name}</h3>
+            <p style="font-size:13px;color:var(--muted);margin:0;">
+              کلاس ${student.class} — کد ملی: ${student.national}
+            </p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="printReportCard('${student.id}')">🖨️ پرینت کل سال</button>
+        </div>
+        
+        <div class="grid grid-4" style="margin-bottom:20px;">
+          ${statCard('bg-blue','🎯', totalAvg.toFixed(2), 'معدل کل')}
+          ${statCard('bg-green','🥇', rClass.rank + ' / ' + rClass.total, 'رتبه کلاس')}
+          ${statCard('bg-orange','🏅', rGrade.rank + ' / ' + rGrade.total, 'رتبه پایه')}
+          ${statCard('bg-purple','🏆', rSchool.rank + ' / ' + rSchool.total, 'رتبه مدرسه')}
+        </div>
+        
+        <div class="card" style="margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+            <h3 style="color:var(--primary-dark);margin:0;font-size:15px;">کارنامه ماهانه</h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <select id="monthSelect_${student.id}" onchange="showMonthReportInModal('${student.id}', this.value)" 
+                style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;">
+                <option value="">— انتخاب ماه —</option>
+                ${MONTHS.map(m => `<option value="${m}">${m}</option>`).join('')}
+              </select>
+              <button class="btn btn-primary btn-sm" onclick="printMonthReportFromModal('${student.id}')">🖨️ پرینت ماه</button>
+            </div>
+          </div>
+          <div id="monthReportArea_${student.id}"></div>
+        </div>
+        
+        <div class="card" style="margin-bottom:16px;">
+          <h3 style="margin-bottom:14px;color:var(--primary-dark);font-size:15px;">📚 معدل هر درس (کل سال)</h3>
+          <div class="table-wrap"><table>
+            <thead><tr><th>درس</th><th>معدل سال</th><th>وضعیت</th></tr></thead>
+            <tbody>${summaryRows}</tbody>
+          </table></div>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">بستن</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function showMonthReportInModal(studentId, month){
+  const area = document.getElementById('monthReportArea_' + studentId);
+  if(!area) return;
+  if(!month){ area.innerHTML = ''; return; }
+  
+  const gradesAll = DB.get('grades',{})[studentId] || {};
+  const lessons = DB.get('lessons',[]);
+  
+  const rows = lessons.map(l => {
+    const avg = calcLessonMonthAvg(gradesAll, l, month);
+    const mg = (gradesAll[l]||{})[month] || {};
+    return `<tr>
+      <td>${l}</td>
+      ${[1,2,3,4,5].map(i => `<td>${mg['n'+i] ?? '—'}</td>`).join('')}
+      <td><strong>${avg != null ? avg.toFixed(2) : '—'}</strong></td>
+    </tr>`;
+  }).join('');
+  
+  const monthAvg = calcAverageForMonth(gradesAll, month);
+  
+  area.innerHTML = `
+    <div style="background:#f8fafc;padding:12px;border-radius:10px;margin-bottom:12px;">
+      <strong>معدل ماه ${month}:</strong> 
+      <span style="color:var(--primary);font-size:18px;">${monthAvg != null ? monthAvg.toFixed(2) : '—'}</span>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr>
+        <th>درس</th><th>نمره ۱</th><th>نمره ۲</th><th>نمره ۳</th><th>نمره ۴</th><th>نمره ۵</th><th>معدل</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>
+  `;
+}
+
+function printMonthReportFromModal(studentId){
+  const select = document.getElementById('monthSelect_' + studentId);
+  if(!select) return;
+  const month = select.value;
+  if(!month) return alert('ابتدا یک ماه را انتخاب کنید');
+  printReportCard(studentId, month);
+}
+/* ============================================================
+   بخش ۱۰: مدیریت داده‌ها (Import/Export/Reset)
+   ============================================================ */
+
+function dataManagementPanel(){
+  return `
+    <div class="card" style="margin-top:16px;border-right:4px solid var(--warning);">
+      <h3 style="margin-bottom:14px;color:var(--warning);">⚙️ مدیریت داده‌ها</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;">
+        از این بخش می‌توانید داده‌های نمونه را پاک کنید و اطلاعات واقعی مدرسه خود را وارد کنید.
+      </p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-outline btn-sm" onclick="downloadCSVTemplate()">📥 دانلود قالب Excel</button>
+        <button class="btn btn-primary btn-sm" onclick="showImportCSV()">📤 ورود از فایل Excel/CSV</button>
+        <button class="btn btn-outline btn-sm" onclick="backupData()">💾 پشتیبان‌گیری (JSON)</button>
+        <button class="btn btn-outline btn-sm" onclick="showRestoreData()">♻️ بازیابی از پشتیبان</button>
+        <button class="btn btn-sm" style="background:#fee2e2;color:#991b1b;" onclick="resetAllData()">🗑️ حذف کامل داده‌ها</button>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- دانلود قالب CSV ---------- */
+function downloadCSVTemplate(){
+  const header = 'نام,کد ملی,کلاس,شماره پدر,شماره مادر,شماره شاد,رمز عبور';
+  const rows = [
+    'علی محمدی,1234567890,هفتم الف,09121111111,09122222222,09123333333,123456',
+    'زهرا احمدی,1234567891,هفتم الف,09124444444,09125555555,09126666666,123456',
+    'محمد رضایی,1234567892,هفتم ب,09127777777,09128888888,09129999999,123456'
+  ];
+  const csv = '\uFEFF' + [header, ...rows].join('\n');
+  downloadFile(csv, 'template-students.csv', 'text/csv;charset=utf-8');
+  alert('✅ قالب دانلود شد. با Excel باز کنید و اطلاعات را جایگزین کنید.');
+}
+
+function downloadFile(content, filename, type){
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ---------- مودال Import ---------- */
+function showImportCSV(){
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>📤 ورود دانش‌آموزان از فایل</h3>
+        <div style="background:#fef3c7;padding:12px;border-radius:10px;margin-bottom:16px;font-size:12.5px;line-height:1.8;">
+          <strong>📋 راهنما:</strong><br>
+          ۱. ابتدا قالب رو دانلود کنید<br>
+          ۲. در Excel پر کنید<br>
+          ۳. ذخیره با فرمت <b>CSV UTF-8</b><br>
+          ۴. فایل رو اینجا بارگذاری کنید<br>
+          <br>
+          <strong>📊 ستون‌های موردنیاز:</strong><br>
+          نام، کد ملی، کلاس، شماره پدر، شماره مادر، شماره شاد، رمز عبور (اختیاری)
+        </div>
+        
+        <div class="field">
+          <label>فایل CSV</label>
+          <input type="file" id="csvFile" accept=".csv,.txt"
+            style="padding:10px;border:1.5px dashed var(--primary-light);border-radius:10px;background:#f0f9ff;width:100%;">
+        </div>
+        
+        <div class="field">
+          <label>
+            <input type="checkbox" id="clearBeforeImport"> 
+            حذف دانش‌آموزان فعلی قبل از Import
+          </label>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">لغو</button>
+          <button class="btn btn-primary" onclick="processImport()">شروع Import</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+/* ---------- پردازش Import ---------- */
+function processImport(){
+  const fileInput = document.getElementById('csvFile');
+  const clearBefore = document.getElementById('clearBeforeImport').checked;
+  const file = fileInput.files[0];
+  
+  if(!file) return alert('لطفاً یک فایل انتخاب کنید');
+  
+  const reader = new FileReader();
+  reader.onload = function(e){
+    let content = e.target.result;
+    if(content.charCodeAt(0) === 0xFEFF) content = content.slice(1);
+    
+    const firstLine = content.split('\n')[0];
+    const sep = firstLine.includes(';') ? ';' : ',';
+    
+    const lines = content.split('\n').map(l => l.trim()).filter(l => l);
+    if(lines.length < 2) return alert('فایل خالی یا ناقص است');
+    
+    const header = lines[0].split(sep).map(h => h.trim());
+    
+    const findCol = (...names) => {
+      for(const n of names){
+        const idx = header.findIndex(h => h.includes(n));
+        if(idx > -1) return idx;
+      }
+      return -1;
+    };
+    
+    const colName = findCol('نام');
+    const colNational = findCol('کد ملی','ملی','کدملی');
+    const colClass = findCol('کلاس','پایه');
+    const colFather = findCol('پدر');
+    const colMother = findCol('مادر');
+    const colShad = findCol('شاد');
+    const colPass = findCol('رمز','پسورد','password');
+    
+    if(colName === -1 || colNational === -1 || colClass === -1){
+      return alert('ستون‌های ضروری پیدا نشد: نام، کد ملی، کلاس');
+    }
+    
+    const newStudents = [];
+    const newClasses = new Set();
+    let counter = 0;
+    
+    for(let i = 1; i < lines.length; i++){
+      const parts = lines[i].split(sep).map(p => p.trim().replace(/^"|"$/g, ''));
+      const name = parts[colName] || '';
+      const national = (parts[colNational] || '').replace(/\D/g, '');
+      const cls = parts[colClass] || '';
+      const father = (parts[colFather] || '').replace(/\D/g, '');
+      const mother = (parts[colMother] || '').replace(/\D/g, '');
+      const shad = (parts[colShad] || '').replace(/\D/g, '');
+      const pass = colPass > -1 ? (parts[colPass] || '') : '';
+      
+      if(!name || !national || !cls){ continue; }
+      
+      counter++;
+      newStudents.push({
+        id: 's' + Date.now() + '_' + counter,
+        name, national, class: cls,
+        father: father || '09000000000',
+        mother: mother || '09000000000',
+        shad: shad || '09000000000',
+        pass: pass || '1234' + pad(counter % 100),
+        tracking: (10000000 + counter).toString(),
+        createdAt: faDate()
+      });
+      newClasses.add(cls);
+    }
+    
+    if(!newStudents.length) return alert('هیچ دانش‌آموز معتبری پیدا نشد');
+    
+    let students = clearBefore ? [] : DB.get('students',[]);
+    const existingNationals = new Set(students.map(s => s.national));
+    const finalStudents = newStudents.filter(s => !existingNationals.has(s.national));
+    const skipped = newStudents.length - finalStudents.length;
+    
+    students = students.concat(finalStudents);
+    DB.set('students', students);
+    
+    const classes = clearBefore ? [] : DB.get('classes',[]);
+    newClasses.forEach(c => { if(!classes.includes(c)) classes.push(c); });
+    DB.set('classes', classes);
+    
+    const grades = DB.get('grades',{});
+    finalStudents.forEach(s => {
+      if(!grades[s.id]){
+        grades[s.id] = {};
+        LESSONS.forEach(l => {
+          grades[s.id][l] = {};
+          MONTHS.forEach(m => { grades[s.id][l][m] = {}; });
+        });
+      }
+    });
+    DB.set('grades', grades);
+    
+    closeModal();
+    
+    let msg = `✅ ${finalStudents.length} دانش‌آموز با موفقیت اضافه شد.`;
+    if(skipped > 0) msg += `\n⚠️ ${skipped} نفر به دلیل کد ملی تکراری رد شدند.`;
+    msg += `\n📊 ${newClasses.size} کلاس جدید ساخته شد.`;
+    
+    alert(msg);
+    goTo('dashboard');
+  };
+  
+  reader.readAsText(file, 'UTF-8');
+}
+
+/* ---------- پشتیبان‌گیری ---------- */
+function backupData(){
+  const data = {
+    version: 1,
+    date: faDate(),
+    classes: DB.get('classes',[]),
+    lessons: DB.get('lessons',[]),
+    students: DB.get('students',[]),
+    teachers: DB.get('teachers',[]),
+    admins: DB.get('admins',[]),
+    grades: DB.get('grades',{}),
+    homeworks: DB.get('homeworks',[]),
+    exams: DB.get('exams',[]),
+    notices: DB.get('notices',[]),
+    competitions: DB.get('competitions',[]),
+    discipline: DB.get('discipline',[]),
+    disciplineTypes: DB.get('disciplineTypes',[]),
+    messages: DB.get('messages',[])
+  };
+  const json = JSON.stringify(data, null, 2);
+  downloadFile(json, `backup-${faDate().replace(/\//g,'-')}.json`, 'application/json');
+  alert('✅ فایل پشتیبان دانلود شد');
+}
+
+/* ---------- بازیابی ---------- */
+function showRestoreData(){
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>♻️ بازیابی از پشتیبان</h3>
+        <div style="background:#fee2e2;padding:12px;border-radius:10px;margin-bottom:16px;font-size:13px;">
+          ⚠️ <strong>هشدار:</strong> با بازیابی، همه داده‌های فعلی پاک می‌شوند!
+        </div>
+        <div class="field">
+          <label>فایل پشتیبان (JSON)</label>
+          <input type="file" id="restoreFile" accept=".json"
+            style="padding:10px;border:1.5px dashed var(--primary-light);border-radius:10px;background:#f0f9ff;width:100%;">
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">لغو</button>
+          <button class="btn btn-primary" onclick="processRestore()">بازیابی</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function processRestore(){
+  const file = document.getElementById('restoreFile').files[0];
+  if(!file) return alert('فایل را انتخاب کنید');
+  if(!confirm('همه داده‌های فعلی پاک می‌شوند. مطمئنید؟')) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const data = JSON.parse(e.target.result);
+      const keys = ['classes','lessons','students','teachers','admins','grades','homeworks','exams','notices','competitions','discipline','disciplineTypes','messages'];
+      keys.forEach(k => { if(data[k] !== undefined) DB.set(k, data[k]); });
+      DB.set('initialized', true);
+      closeModal();
+      alert('✅ داده‌ها با موفقیت بازیابی شد. صفحه رفرش می‌شود...');
+      setTimeout(() => location.reload(), 1500);
+    }catch(err){
+      alert('❌ فایل نامعتبر است: ' + err.message);
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+/* ---------- حذف کامل ---------- */
+function resetAllData(){
+  const html = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <h3>🗑️ حذف کامل داده‌ها</h3>
+        <div style="background:#fee2e2;padding:14px;border-radius:10px;margin-bottom:16px;font-size:13.5px;line-height:1.8;">
+          ⚠️ <strong>هشدار جدی:</strong><br>
+          با این کار، <b>تمام</b> اطلاعات زیر پاک می‌شود:<br>
+          • همه دانش‌آموزان (${DB.get('students',[]).length} نفر)<br>
+          • همه کلاس‌ها (${DB.get('classes',[]).length} کلاس)<br>
+          • همه نمرات، تکالیف، امتحانات<br>
+          • همه اطلاعیه‌ها، مسابقات، پیام‌ها<br>
+          • همه موارد انضباطی<br>
+          <br>
+          <strong>این عمل قابل بازگشت نیست!</strong> (مگر از پشتیبان)
+        </div>
+        
+        <div class="field">
+          <label>چه چیزهایی حذف شوند؟</label>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;font-size:13.5px;">
+            <label><input type="checkbox" id="resetStudents" checked> 🗑️ دانش‌آموزان و نمرات</label>
+            <label><input type="checkbox" id="resetClasses" checked> 🗑️ کلاس‌ها</label>
+            <label><input type="checkbox" id="resetHomeworks" checked> 🗑️ تکالیف و امتحانات</label>
+            <label><input type="checkbox" id="resetNotices" checked> 🗑️ اطلاعیه‌ها و مسابقات</label>
+            <label><input type="checkbox" id="resetDiscipline" checked> 🗑️ موارد انضباطی</label>
+            <label><input type="checkbox" id="resetMessages" checked> 🗑️ پیام‌ها</label>
+          </div>
+        </div>
+        
+        <div class="field">
+          <label>برای تأیید، عبارت <b>حذف کن</b> را تایپ کنید:</label>
+          <input type="text" id="resetConfirm" placeholder="حذف کن" style="margin-top:6px;">
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn btn-outline" onclick="closeModal()">لغو</button>
+          <button class="btn" style="background:#dc2626;color:#fff;" onclick="processReset()">🗑️ حذف کن</button>
+        </div>
+      </div>
+    </div>`;
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function processReset(){
+  const confirmText = document.getElementById('resetConfirm').value.trim();
+  if(confirmText !== 'حذف کن') return alert('برای تأیید، عبارت «حذف کن» را وارد کنید');
+  
+  if(document.getElementById('resetStudents').checked){
+    DB.set('students', []);
+    DB.set('grades', {});
+  }
+  if(document.getElementById('resetClasses').checked){
+    DB.set('classes', []);
+  }
+  if(document.getElementById('resetHomeworks').checked){
+    DB.set('homeworks', []);
+    DB.set('exams', []);
+  }
+  if(document.getElementById('resetNotices').checked){
+    DB.set('notices', []);
+    DB.set('competitions', []);
+  }
+  if(document.getElementById('resetDiscipline').checked){
+    DB.set('discipline', []);
+  }
+  if(document.getElementById('resetMessages').checked){
+    DB.set('messages', []);
+  }
+  
+  closeModal();
+  alert('✅ داده‌های انتخابی حذف شد');
+  goTo('dashboard');
+}
+/* ============================================================
+   بخش ۱۱: راه‌اندازی نهایی
+   ============================================================ */
+
+seedData();
+
+const savedUser = DB.get('currentUser');
+if(savedUser && savedUser.role){
+  currentUser = savedUser;
+  enterApp();
+}
+</script>
+</body>
+</html>
